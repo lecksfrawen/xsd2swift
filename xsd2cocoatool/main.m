@@ -11,8 +11,6 @@
 
 BOOL wrteCode(NSURL *schemaURL, NSURL* outFolder, NSURL *templateUrl, NSString *classPrefix, NSError **outError)
 {
-	NSFileManager* fm = [NSFileManager defaultManager];
-	
 	/* Open the schema specified by the user */
 	NSError* error = nil;
 	
@@ -103,6 +101,16 @@ int main(int argc, const char * argv[]) {
 		}
 		[userDefaults setObject: classPrefix forKey: kClassPrefixKey];
 		
+		[userDefaults synchronize];
+		if (!argumentsAreFine) {
+			return 1;
+		}
+		
+		if (![outFolder checkResourceIsReachableAndReturnError: &error]) {
+			fprintf(stderr, "Can find output directory: %s\n%s\n", outFolder.description.UTF8String, error.localizedDescription.UTF8String);
+			return 2;
+		}
+
 		if (wrteCode(schemaURL, outFolder, templateUrl, classPrefix, &error)) {
 			printf("Classes sucessfully generated for data:\n"
 				   "\t  schema:\t%s\n"
@@ -115,7 +123,7 @@ int main(int argc, const char * argv[]) {
 				   classPrefix.UTF8String);
 		} else {
 			fprintf(stderr, "Failed to generate classes.\n%s\n", error.localizedDescription.UTF8String);
-			return 2;
+			return 3;
 		}
 	}
     return 0;
