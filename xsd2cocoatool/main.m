@@ -39,7 +39,7 @@ BOOL wrteCode(NSURL *schemaURL, NSURL* outFolder, NSURL *templateUrl, NSString *
 	}
 	
 	/* Select the type of code that we want to generate (Framework, Library, or Source Code -- Default for us is source code) */
-	XSDschemaGeneratorOptions productTypes = 0;
+	XSDschemaGeneratorOptions productTypes = XSDschemaGeneratorOptionSourceCode;
 	
 	/*
 	 *  Write the code for the types that are currently in use... All the simple types
