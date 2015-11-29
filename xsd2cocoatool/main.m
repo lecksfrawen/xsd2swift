@@ -63,6 +63,7 @@ static NSString *const kSchemaKey =@"schema";
 static NSString *const kOutputDirKey =@"out";
 static NSString *const kTemplateFileKey =@"template";
 static NSString *const kClassPrefixKey =@"prefix";
+static NSString *const kClearOutputDirKey =@"clear";
 
 int main(int argc, const char * argv[]) {
 	@autoreleasepool {
@@ -110,6 +111,17 @@ int main(int argc, const char * argv[]) {
 			fprintf(stderr, "Can find output directory: %s\n%s\n", outFolder.description.UTF8String, error.localizedDescription.UTF8String);
 			return 2;
 		}
+        if ([userDefaults boolForKey: kClearOutputDirKey]) {
+            NSFileManager *fm = [NSFileManager defaultManager];
+            NSURL *itemToDelete = [outFolder URLByAppendingPathComponent: @"Sources"];
+            if ([itemToDelete checkResourceIsReachableAndReturnError: &error]) {
+                if (![fm removeItemAtURL: itemToDelete
+                                   error: &error]) {
+                    fprintf(stderr, "Can remove item at: %s\n%s\n", itemToDelete.description.UTF8String, error.localizedDescription.UTF8String);
+                    return 3;
+                }
+            }
+        }
 
 		if (wrteCode(schemaURL, outFolder, templateUrl, classPrefix, &error)) {
 			printf("Classes sucessfully generated for data:\n"
