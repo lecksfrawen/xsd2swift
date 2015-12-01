@@ -122,17 +122,18 @@ int main(int argc, const char * argv[]) {
                 }
             }
         }
-
+        printf("Generating for data:\n"
+               "\t  schema:\t%s\n"
+               "\t     out:\t%s\n"
+               "\ttemplate:\t%s\n"
+               "\t  prefix:\t%s\n………\n",
+               schemaURL.description.UTF8String,
+               outFolder.description.UTF8String,
+               templateUrl.description.UTF8String,
+               classPrefix.UTF8String);
+        
 		if (wrteCode(schemaURL, outFolder, templateUrl, classPrefix, &error)) {
-			printf("Classes sucessfully generated for data:\n"
-				   "\t  schema:\t%s\n"
-				   "\t     out:\t%s\n"
-				   "\ttemplate:\t%s\n"
-				   "\t  prefix:\t%s\n",
-				   schemaURL.description.UTF8String,
-				   outFolder.description.UTF8String,
-				   templateUrl.description.UTF8String,
-				   classPrefix.UTF8String);
+			printf("…Classes sucessfully generated!\n");
 		} else {
 			fprintf(stderr, "Failed to generate classes.\n%s\n", error.localizedDescription.UTF8String);
 			return 3;
