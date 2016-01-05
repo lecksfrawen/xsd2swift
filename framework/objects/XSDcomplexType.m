@@ -17,6 +17,7 @@
 
 @property (readonly, nonatomic) NSString* complexTypeArrayType;
 @property (readonly, nonatomic) NSString* readComplexTypeElementTemplate;
+@property (readonly, nonatomic) NSString* writeComplexTypeElementTemplate;
 
 @end
 
@@ -306,6 +307,15 @@
 
 - (NSString*) readCodeForAttribute:(XSDattribute *)attribute {
     return @"/* cant have a complex attribute */";
+}
+
+- (NSString*) writeCodeForAttribute: (XSDattribute*) attribute {
+    return @"/* cant have a complex attribute */";
+}
+
+- (NSString*) writeCodeForElement: (XSDelement*) element {
+    NSDictionary* dict = [NSDictionary dictionaryWithObject: element forKey: @"element"];
+    return [engine processTemplate: self.schema.writeComplexTypeElementTemplate withVariables: dict];
 }
 
 - (NSString*)combinedReadPrefixCode {

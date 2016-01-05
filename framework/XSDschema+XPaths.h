@@ -42,6 +42,8 @@
 
 - (NSString*)XPathForTemplateFirstElementRead;
 
+- (NSString*)XPathForTemplateFirstElementWrite;
+
 + (NSString*)XPathForNamechanges;
 
 @end

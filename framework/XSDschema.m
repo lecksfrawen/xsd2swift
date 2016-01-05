@@ -43,6 +43,13 @@
 @property (strong, nonatomic) NSString* readerClassTemplateExtension;
 @property (strong, nonatomic) NSString* readerHeaderTemplateString;
 @property (strong, nonatomic) NSString* readerHeaderTemplateExtension;
+
+@property (strong, nonatomic) NSString* writeComplexTypeElementTemplate;
+@property (strong, nonatomic) NSString* writerClassTemplateString;
+@property (strong, nonatomic) NSString* writerClassTemplateExtension;
+@property (strong, nonatomic) NSString* writerHeaderTemplateString;
+@property (strong, nonatomic) NSString* writerHeaderTemplateExtension;
+
 @property (strong, nonatomic) NSString* classTemplateString;
 @property (strong, nonatomic) NSString* classTemplateExtension;
 @property (strong, nonatomic) NSString* headerTemplateString;
@@ -470,6 +477,16 @@
     }
     if(nodes != nil && nodes.count > 0) {
         self.readComplexTypeElementTemplate = [[nodes objectAtIndex: 0] stringValue];
+    }
+    
+    /* Fetch the code used to WRITE elements that have a complex type */
+    nodes = [complexTypeNode nodesForXPath:self.XPathForTemplateFirstElementWrite error: &error];
+    if(error != nil) {
+        if(resultError) *resultError = error;
+        return NO;
+    }
+    if(nodes != nil && nodes.count > 0) {
+        self.writeComplexTypeElementTemplate = [[nodes objectAtIndex: 0] stringValue];
     }
     
     //get the array type for complex types

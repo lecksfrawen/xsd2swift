@@ -26,6 +26,10 @@
 @property (strong, nonatomic) NSString* readElementTemplate;
 @property (strong, nonatomic) NSString* readValueCode;
 @property (strong, nonatomic) NSString* readPrefixCode;
+@property (strong, nonatomic) NSString* writeAttributeTemplate;
+@property (strong, nonatomic) NSString* writeElementTemplate;
+@property (strong, nonatomic) NSString* writeValueCode;
+@property (strong, nonatomic) NSString* writePrefixCode;
 @property (strong, nonatomic) NSArray* includes;
 
 @property (strong, nonatomic) NSString* enumReadAttributeTemplate;
@@ -179,6 +183,43 @@
         self.readValueCode = [[valueElementNodes objectAtIndex: 0] stringValue];
     }
     /*  */
+    
+    /* Grab the prefix from the matching element type in our template to the current simple type in our XSD */
+    NSArray* writePrefixNodes = [element nodesForXPath:@"write[1]/prefix[1]" error: error];
+    if(*error != nil) {
+        return NO;
+    }
+    if(writePrefixNodes.count > 0) {
+        self.writePrefixCode = [[writePrefixNodes objectAtIndex: 0] stringValue];
+    }
+    /*  */
+    NSArray* writeAttributeNodes = [element nodesForXPath:@"write[1]/attribute[1]" error: error];
+    if(*error != nil) {
+        return NO;
+    }
+    if(writeAttributeNodes.count > 0) {
+        NSString* temp  = [[writeAttributeNodes objectAtIndex: 0] stringValue];
+        self.writeAttributeTemplate = temp;
+    }
+    /*  */
+    NSArray* writeElementNodes = [element nodesForXPath:@"write[1]/element[1]" error: error];
+    if(*error != nil) {
+        return NO;
+    }
+    if(writeElementNodes.count > 0) {
+        self.writeElementTemplate = [[writeElementNodes objectAtIndex: 0] stringValue];
+    }
+    /*  */
+    NSArray* writeValueElementNodes = [element nodesForXPath:@"write[1]/value[1]" error: error];
+    if(*error != nil) {
+        return NO;
+    }
+    if(writeValueElementNodes.count > 0) {
+        self.writeValueCode = [[writeValueElementNodes objectAtIndex: 0] stringValue];
+    }
+    /*  */
+    
+    
     NSArray* includeElementNodes = [element nodesForXPath:@"/read[1]/include" error: error];
     if(*error != nil) {
         return NO;
@@ -239,6 +280,14 @@
     return [engine processTemplate: self.readAttributeTemplate withVariables: dict];
 }
 
+- (NSString*) writeCodeForAttribute: (XSDattribute*) attribute {
+    NSDictionary* dict = [NSDictionary dictionaryWithObject: attribute forKey: @"attribute"];
+    return [engine processTemplate: self.writeAttributeTemplate withVariables: dict];
+}
+
+- (NSString*) writeCodeForElement: (XSDelement*) element {
+    return @"/* TODO: Implement writeCodeForElement simple type*/";
+}
 
 - (NSString *)readElementTemplate {
     XSSimpleType *t = self.typeForTemplate;

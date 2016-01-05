@@ -89,6 +89,10 @@
     return @"read[1]/element[1]";
 }
 
+- (NSString*)XPathForTemplateFirstElementWrite {
+    return @"write[1]/element[1]";
+}
+
 + (NSString*)XPathForNamechanges {
     return @"/nameChanges/nameChange";
 }
