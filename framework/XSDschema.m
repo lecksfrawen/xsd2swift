@@ -59,7 +59,7 @@
 @property (strong, nonatomic) NSString* enumHeaderTemplateString;
 @property (strong, nonatomic) NSString* enumHeaderTemplateExtension;
 
-@property (strong, nonatomic) NSXMLNode* enumReadNode;
+@property (strong, nonatomic) NSXMLNode* enumNode;
 
 @property (strong, nonatomic) NSDictionary* additionalFiles;
 @property (strong, nonatomic) NSString *targetNamespacePrefix;
@@ -370,14 +370,8 @@
         enumTypeNode = [nodes objectAtIndex: 0];
     }
     
-    //reader
-    nodes = [enumTypeNode nodesForXPath:self.XPathForTemplateReads error: &error];
-    if(error != nil) {
-        if(resultError) *resultError = error;
-        return NO;
-    }
-    if(nodes != nil && nodes.count > 0) {
-        self.enumReadNode = [nodes objectAtIndex: 0];
+    if(enumTypeNode != nil) {
+        self.enumNode = enumTypeNode;
     }
     
     /* Fetch the header file that we will use in the enumeration section */
@@ -423,10 +417,10 @@
         /* Check if we have that simpletype within our XSD provided */
         if(existingSimpleType) {
             /* For our simple type, define the values from the template */
-            [existingSimpleType supplyTemplates:aSimpleTypeNode enumTypeNode:self.enumReadNode error: &error];
+            [existingSimpleType supplyTemplates:aSimpleTypeNode enumTypeNode:self.enumNode error: &error];
         }
         else {
-            [aSimpleType supplyTemplates:aSimpleTypeNode enumTypeNode:self.enumReadNode error:&error];
+            [aSimpleType supplyTemplates:aSimpleTypeNode enumTypeNode:self.enumNode error:&error];
             [_knownSimpleTypeDict setValue: aSimpleType forKey: aSimpleType.name];
         }
     }
@@ -660,7 +654,12 @@
     /* SOURCE CODE - If we want to write source code */
     if (options & XSDschemaGeneratorOptionSourceCode) {
         /* Create the path that will contain all the code */
+        NSDate *date = [NSDate new];
+        NSTimeInterval ti = [date timeIntervalSince1970];
+        NSString *dirName = [NSString stringWithFormat:@"%ld", (long)ti];
+        
         NSURL *srcFolderUrl = [destinationFolder URLByAppendingPathComponent:@"Sources" isDirectory:YES];
+//        NSURL *srcFolderUrl = [destinationFolder URLByAppendingPathComponent:dirName isDirectory:YES];
         
         /* Create the actual directory at the location defined above */
         if(![[NSFileManager defaultManager] createDirectoryAtURL:srcFolderUrl withIntermediateDirectories:NO attributes:nil error:error]) {

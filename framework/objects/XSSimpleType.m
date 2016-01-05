@@ -37,6 +37,11 @@
 @property (strong, nonatomic) NSString* enumReadValueCode;
 @property (strong, nonatomic) NSString* enumReadPrefixCode;
 
+@property (strong, nonatomic) NSString* enumWriteAttributeTemplate;
+@property (strong, nonatomic) NSString* enumWriteElementTemplate;
+@property (strong, nonatomic) NSString* enumWriteValueCode;
+@property (strong, nonatomic) NSString* enumWritePrefixCode;
+
 @end
 
 @implementation XSSimpleType {
@@ -235,33 +240,58 @@
 
     //enum support
     if(enumTypeNode) {
-        NSArray *nodes = [enumTypeNode nodesForXPath:@"prefix" error: error];
+        NSArray *nodes = [enumTypeNode nodesForXPath:@"read[1]/prefix[1]" error: error];
         if(*error != nil) {
             return NO;
         }
         if(nodes != nil && nodes.count > 0) {
             self.enumReadPrefixCode = [[nodes objectAtIndex: 0] stringValue];
         }
-        nodes = [enumTypeNode nodesForXPath:@"attribute" error: error];
+        nodes = [enumTypeNode nodesForXPath:@"read[1]/attribute[1]" error: error];
         if(*error != nil) {
             return NO;
         }
         if(nodes != nil && nodes.count > 0) {
             self.enumReadAttributeTemplate = [[nodes objectAtIndex: 0] stringValue];
         }
-        nodes = [enumTypeNode nodesForXPath:@"element" error: error];
+        nodes = [enumTypeNode nodesForXPath:@"read[1]/element[1]" error: error];
         if(*error != nil) {
             return NO;
         }
         if(nodes != nil && nodes.count > 0) {
             self.enumReadElementTemplate = [[nodes objectAtIndex: 0] stringValue];
         }
-        nodes = [enumTypeNode nodesForXPath:@"value" error: error];
+        nodes = [enumTypeNode nodesForXPath:@"read[1]/value[1]" error: error];
         if(*error != nil) {
             return NO;
         }
         if(nodes != nil && nodes.count > 0) {
-            self.enumReadValueCode = [[nodes objectAtIndex: 0] stringValue];
+            self.enumWriteValueCode = [[nodes objectAtIndex: 0] stringValue];
+        }
+        
+        if(nodes != nil && nodes.count > 0) {
+            self.enumWritePrefixCode = [[nodes objectAtIndex: 0] stringValue];
+        }
+        nodes = [enumTypeNode nodesForXPath:@"write[1]/attribute[1]" error: error];
+        if(*error != nil) {
+            return NO;
+        }
+        if(nodes != nil && nodes.count > 0) {
+            self.enumWriteAttributeTemplate = [[nodes objectAtIndex: 0] stringValue];
+        }
+        nodes = [enumTypeNode nodesForXPath:@"write[1]/element[1]" error: error];
+        if(*error != nil) {
+            return NO;
+        }
+        if(nodes != nil && nodes.count > 0) {
+            self.enumWriteElementTemplate = [[nodes objectAtIndex: 0] stringValue];
+        }
+        nodes = [enumTypeNode nodesForXPath:@"write[1]/value[1]" error: error];
+        if(*error != nil) {
+            return NO;
+        }
+        if(nodes != nil && nodes.count > 0) {
+            self.enumWriteValueCode = [[nodes objectAtIndex: 0] stringValue];
         }
     }
     
@@ -275,6 +305,13 @@
     return t->_readAttributeTemplate;
 }
 
+- (NSString *)writeAttributeTemplate {
+    XSSimpleType *t = self.typeForTemplate;
+    if(self.hasEnumeration)
+        return t->_enumWriteAttributeTemplate;
+    return t->_writeAttributeTemplate;
+}
+
 - (NSString*) readCodeForAttribute: (XSDattribute*) attribute {
     NSDictionary* dict = [NSDictionary dictionaryWithObject: attribute forKey: @"attribute"];
     return [engine processTemplate: self.readAttributeTemplate withVariables: dict];
@@ -286,7 +323,8 @@
 }
 
 - (NSString*) writeCodeForElement: (XSDelement*) element {
-    return @"/* TODO: Implement writeCodeForElement simple type*/";
+    NSDictionary* dict = [NSDictionary dictionaryWithObject: element forKey: @"element"];
+    return [engine processTemplate: self.writeElementTemplate withVariables: dict];
 }
 
 - (NSString *)readElementTemplate {
