@@ -47,7 +47,10 @@ if (self.{{ element.variableName }} != nil) {
             </element>
             <value>
                 <![CDATA[
-                // TODO: Implement write template for NSString value
+                if (self.value != nil) {
+                    xmlChar *v = (xmlChar *)[self.value UTF8String];
+                    xmlTextWriterWriteString(writer, v);
+                }
                 ]]>
             </value>
         </write>
@@ -487,9 +490,13 @@ for (id obj in self.{{ element.variableName }}) {
         - (void) archiveToWriter: (void*) writer ns:(NSString*)ns{
             {% if type.hasComplexBaseClass %}self = [super archiveToWriter: writer];{% /if %}
             [self writeAttributes: writer];
-            {% for element in type.elements %}
-                {{ element.writeCodeForContent }}
-            {% /for %}
+            {% if type.hasSimpleBaseClass %}
+                {{ type.writeSimpleContent }}
+            {% else %}
+                {% for element in type.elements %}
+                    {{ element.writeCodeForContent }}
+                {% /for %}
+            {% /if %}
         }
 
         /**
@@ -661,7 +668,8 @@ for (id obj in self.{{ element.variableName }}) {
                 xmlTextWriterStartDocument(writer, "1.0", "utf-8", NULL);
                 xmlTextWriterSetIndent(writer, 1);
                 xmlTextWriterSetIndentString(writer, (xmlChar *)"\t");
-                xmlTextWriterStartElementNS(writer, NULL, (xmlChar *)"{{ type.name }}", NULL);
+                xmlChar *ns = (xmlChar *)"{{ type.schema.targetNamespace }}";
+                xmlTextWriterStartElementNS(writer, NULL, (xmlChar *)"{{ type.name }}", ns);
                 [obj archiveToWriter:writer ns:nil];
                 xmlTextWriterEndElement(writer);
                 xmlTextWriterEndDocument(writer);
