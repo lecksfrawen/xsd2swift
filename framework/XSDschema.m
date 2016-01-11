@@ -45,10 +45,6 @@
 @property (strong, nonatomic) NSString* readerHeaderTemplateExtension;
 
 @property (strong, nonatomic) NSString* writeComplexTypeElementTemplate;
-@property (strong, nonatomic) NSString* writerClassTemplateString;
-@property (strong, nonatomic) NSString* writerClassTemplateExtension;
-@property (strong, nonatomic) NSString* writerHeaderTemplateString;
-@property (strong, nonatomic) NSString* writerHeaderTemplateExtension;
 
 @property (strong, nonatomic) NSString* classTemplateString;
 @property (strong, nonatomic) NSString* classTemplateExtension;
@@ -654,12 +650,7 @@
     /* SOURCE CODE - If we want to write source code */
     if (options & XSDschemaGeneratorOptionSourceCode) {
         /* Create the path that will contain all the code */
-        NSDate *date = [NSDate new];
-        NSTimeInterval ti = [date timeIntervalSince1970];
-        NSString *dirName = [NSString stringWithFormat:@"%ld", (long)ti];
-        
         NSURL *srcFolderUrl = [destinationFolder URLByAppendingPathComponent:@"Sources" isDirectory:YES];
-//        NSURL *srcFolderUrl = [destinationFolder URLByAppendingPathComponent:dirName isDirectory:YES];
         
         /* Create the actual directory at the location defined above */
         if(![[NSFileManager defaultManager] createDirectoryAtURL:srcFolderUrl withIntermediateDirectories:NO attributes:nil error:error]) {
