@@ -30,28 +30,18 @@
             <prefix/>
             <attribute>
                 <![CDATA[
-if (self.{{ attribute.variableName }} != nil) {
-    xmlChar *value = (xmlChar *)[self.{{ attribute.variableName }} UTF8String];
-    xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", value);
-}]]>
+                {{ attribute.variableName }}AttrValue = [self.{{ attribute.variableName }} UTF8String];
+            ]]>
             </attribute>
-            <element>
-                <![CDATA[
-if (self.{{ element.variableName }} != nil) {
-    xmlChar *name = (xmlChar *)"{{ element.name }}";
-    xmlChar *value = (xmlChar *)[self.{{ element.variableName }} UTF8String];
-    xmlTextWriterStartElement(writer, (xmlChar *)name);
-    xmlTextWriterWriteString(writer, (xmlChar *)value);
-    xmlTextWriterEndElement(writer);
-}]]>
-            </element>
-            <value>
-                <![CDATA[
-                if (self.value != nil) {
-                    xmlChar *v = (xmlChar *)[self.value UTF8String];
-                    xmlTextWriterWriteString(writer, v);
+            <element><![CDATA[
+                xmlTextWriterWriteString(writer, (xmlChar*)[{{ element.variableName }}Value UTF8String]);
+            ]]></element>
+            <value><![CDATA[
+                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self.value UTF8String]);
+                if (rc < 0) {
+                    return NO;
                 }
-                ]]>
+            ]]>
             </value>
         </write>
     </simpletype>
@@ -78,19 +68,17 @@ if (self.{{ element.variableName }} != nil) {
         <write>
             <prefix/>
             <attribute><![CDATA[
-                // TODO: Implement write template for NSURL attribute
-                ]]>
-            </attribute>
-            <element>
-                <![CDATA[
-                // TODO: Implement write template for NSURL element
-                ]]>
-            </element>
-            <value>
-                <![CDATA[
-                // TODO: Implement write template for NSURL value
-                ]]>
-            </value>
+                {{ attribute.variableName }}AttrValue = [[self."{{ attribute.variableName }}" absoluteString] UTF8String];
+            ]]></attribute>
+            <element><![CDATA[
+                xmlTextWriterWriteString(writer, (mlChar*)[[self.value absoluteString] UTF8String]);
+            ]]></element>
+            <value><![CDATA[
+                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[self.value absoluteString] UTF8String]);
+                if (rc < 0) {
+                    return NO;
+                }
+            ]]></value>
         </write>
     </simpletype>
     <simpletype name="boolean" objType="NSNumber" arrayType="NSArray">
@@ -116,22 +104,19 @@ if (self.{{ element.variableName }} != nil) {
         </read>
         <write>
             <prefix/>
-            <attribute><![CDATA[
-if (self.{{ attribute.variableName }} != nil) {
-    NSString *str = [self.{{ attribute.variableName }} boolValue] ? @"true" : @"false";
-    xmlChar *value = (xmlChar *)[str UTF8String];
-    xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", value);
-}]]>
+            <attribute><![CDATA[{{ attribute.variableName }}AttrValue = [self.{{ attribute.variableName }} boolValue] ? "true" : "false";
+            ]]>
             </attribute>
-            <element>
-                <![CDATA[
-                // TODO: Implement write template for NSNumber(boolean) element
-                ]]>
+            <element><![CDATA[
+                xmlTextWriterWriteString(writer, (xmlChar*)([{{ element.variableName }}Value boolValue] ? "true" : "false"));
+            ]]>
             </element>
-            <value>
-                <![CDATA[
-                // TODO: Implement write template for NSNumber(boolean) value
-                ]]>
+            <value><![CDATA[
+                int rc = xmlTextWriterWriteString(writer, (xmlChar*)([{{ element.variableName }}Value boolValue] ? "true" : "false"]]);
+                if (rc < 0) {
+                    return NO;
+                }
+            ]]>
             </value>
         </write>
     </simpletype>
@@ -160,24 +145,22 @@ if (self.{{ attribute.variableName }} != nil) {
             </value>
         </read>
         <write>
-            <prefix/>
-            <attribute><![CDATA[
-if (self.{{ attribute.variableName }} != nil) {
-    NSString *str = [self.{{ attribute.variableName }} stringValue];
-    xmlChar *value = (xmlChar *)[str UTF8String];
-    xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", value);
-}]]>
+            <prefix><![CDATA[NSNumberFormatter* numFormatter = [[NSNumberFormatter alloc] init];
+                numFormatter.numberStyle = NSNumberFormatterDecimalStyle;
+            ]]>
+            </prefix>
+            <attribute><![CDATA[{{ attribute.variableName }}AttrValue = [[numFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];
+            ]]>
             </attribute>
-            <element>
-                <![CDATA[
-                // TODO: Implement write template for NSNumber(integer) element
-                ]]>
-            </element>
-            <value>
-                <![CDATA[
-                // TODO: Implement write template for NSNumber(integer) value
-                ]]>
-            </value>
+            <element><![CDATA[
+                xmlTextWriterWriteString(writer, (xmlChar*)[[numFormatter stringFromNumber:{{ element.variableName }}Value] UTF8String]);
+            ]]></element>
+            <value><![CDATA[
+                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[numFormatter stringFromNumber:self.value] UTF8String]);
+                if (rc < 0) {
+                    return NO;
+                }
+            ]]></value>
         </write>
     </simpletype>
     <simpletype name="decimal" objType="NSNumber"
@@ -206,30 +189,28 @@ if (self.{{ attribute.variableName }} != nil) {
             </value>
         </read>
         <write>
-            <prefix/>
-            <attribute><![CDATA[
-if (self.{{ attribute.variableName }} != nil) {
-    NSString *str = [self.{{ attribute.variableName }} stringValue];
-    xmlChar *value = (xmlChar *)[str UTF8String];
-    xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", value);
-}]]>
+            <prefix><![CDATA[NSNumberFormatter* integerFormatter = [[NSNumberFormatter alloc] init];
+                integerFormatter.numberStyle = NSNumberFormatterDecimalStyle;]]>
+            </prefix>
+            <attribute><![CDATA[{{ attribute.variableName }}AttrValue = [[integerFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];]]>
             </attribute>
             <element>
-                <![CDATA[
-                // TODO: Implement write template for NSNumber(decimal) element
-                ]]>
+                <![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[[integerFormatter stringFromNumber: {{ element.variableName }}Value] UTF8String]);]]>
             </element>
             <value>
                 <![CDATA[
-                // TODO: Implement write template for NSNumber(decimal) value
-                ]]>
+                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[integerFormatter stringFromNumber:self.value] UTF8String]);
+                if (rc < 0) {
+                    return NO;
+                }]]>
             </value>
         </write>
     </simpletype>
     <simpletype name="dateTime" objType="NSDate" arrayType="NSArray">
         <read>
-            <prefix>NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-                dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+            <prefix><![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter
+                alloc] init];
+                dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";]]>
             </prefix>
             <attribute>self.{{ attribute.variableName }} = [dateFormatter
                 dateFromString:[NSString stringWithCString:{{ attribute.name
@@ -250,25 +231,20 @@ if (self.{{ attribute.variableName }} != nil) {
             </value>
         </read>
         <write>
-            <prefix>NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-                dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+            <prefix><![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter
+                alloc] init];
+                dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";]]>
             </prefix>
-            <attribute><![CDATA[
-if (self.{{ attribute.variableName }} != nil) {
-    NSString *str = [dateFormatter stringFromDate:self.{{ attribute.variableName }}];
-    xmlChar *value = (xmlChar *)[str UTF8String];
-    xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", value);
-}]];]]>
+            <attribute><![CDATA[{{ attribute.variableName }}AttrValue = [[dateFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];]]>
             </attribute>
-            <element>
-                <![CDATA[
-                // TODO: Implement write template for NSDate(dateTime) element
-                ]]>
+            <element><![CDATA[
+                xmlTextWriterWriteString(writer, (xmlChar*)[[dateFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);]]>
             </element>
-            <value>
-                <![CDATA[
-                // TODO: Implement write template for NSDate(dateTime) value
-                ]]>
+            <value><![CDATA[
+                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[dateFormatter stringFromDate:self.value] UTF8String]);
+                if (rc < 0) {
+                    return NO;
+                }]]>
             </value>
         </write>
     </simpletype>
@@ -298,20 +274,22 @@ if (self.{{ attribute.variableName }} != nil) {
             </value>
         </read>
         <write>
-            <prefix/>
-            <attribute><![CDATA[
-                // TODO: Implement write template for NSDate(date) attribute
-                ]]>
+            <prefix><![CDATA[NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter
+                alloc] init];
+                dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
+                dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];]]>
+            </prefix>
+            <attribute>
+                <![CDATA[{{ attribute.variableName }}AttrValue = [[dateOnlyFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];]]>
             </attribute>
             <element>
-                <![CDATA[
-                // TODO: Implement write template for NSDate(date) element
-                ]]>
+                <![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[[dateOnlyFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);]]>
             </element>
             <value>
-                <![CDATA[
-                // TODO: Implement write template for NSDate(date) value
-                ]]>
+                <![CDATA[int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[dateOnlyFormatter stringFromDate:self.value] UTF8String]);
+                if (rc < 0) {
+                    return NO;
+                }]]>
             </value>
         </write>
     </simpletype>
@@ -340,20 +318,21 @@ if (self.{{ attribute.variableName }} != nil) {
             </value>
         </read>
         <write>
-            <prefix/>
-            <attribute><![CDATA[
-                // TODO: Implement write template for NSDate(time) attribute
-                ]]>
+            <prefix><![CDATA[NSDateFormatter* timeFormatter = [[NSDateFormatter
+                alloc] init];
+                timeFormatter.dateFormat = @"HH:mm:ss";
+                timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];]]>
+            </prefix>
+            <attribute>
+                <![CDATA[{{ attribute.variableName }}AttrValue = [[timeFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];]]>
             </attribute>
-            <element>
-                <![CDATA[
-                // TODO: Implement write template for NSDate(time) element
-                ]]>
+            <element><![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[[timeFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);]]>
             </element>
             <value>
-                <![CDATA[
-                // TODO: Implement write template for NSDate(time) value
-                ]]>
+                <![CDATA[int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[timeFormatter stringFromDate:self.value] UTF8String]);
+                if (rc < 0) {
+                    return NO;
+                }]]>
             </value>
         </write>
     </simpletype>
@@ -365,23 +344,12 @@ if (self.{{ attribute.variableName }} != nil) {
             </element>
         </read>
         <write>
-            <prefix/>
-            <attribute/>
-            <element><![CDATA[
-{% if element.isSingleValue %}
-xmlTextWriterStartElementNS(writer, NULL, (xmlChar *)"{{ element.name }}", NULL);
-[self.{{ element.variableName }} archiveToWriter: writer ns:nil];
-xmlTextWriterEndElement(writer);
-{% else %}
-for (id obj in self.{{ element.variableName }}) {
-    xmlTextWriterStartElementNS(writer, NULL, (xmlChar *)"{{ element.name }}", NULL);
-    [obj archiveToWriter: writer ns:nil];
-    xmlTextWriterEndElement(writer);
-}
-{%/if%}
-]]>
+            <element>
+                <![CDATA[BOOL result = [{{ element.variableName }}Value writeWithWriter:writer];
+                    if (!result) {
+                        return NO;
+                    }]]>
             </element>
-            <value/>
         </write>
         <implementation>
             <!--
@@ -451,11 +419,11 @@ for (id obj in self.{{ element.variableName }}) {
         /* Method that is overidden by subclasses that want to extend the base type (xmlTextReaderPtr at the moment) */
         - (void) readAttributes: (void*) reader;
 
-        - (void) archiveToWriter: (void*) writer ns:(NSString*)ns;
-
-        /* Method that is overidden by subclasses that want to extend the base type (xmlTextWriterPtr at the moment) */
-        - (void) writeAttributes: (void*) writer;
-
+        @end
+        
+        @interface {{ type.targetClassName }} (Writing)
+        /* Method serialize object to xml */
+        - (BOOL) writeWithWriter: (void*) writer;
         @end
         ]]>
             </header>
@@ -474,31 +442,7 @@ for (id obj in self.{{ element.variableName }}) {
         #import "{{ complexType.targetClassFileName }}.h"{% /for %}
 
         @implementation {{ type.targetClassName }}
-
-        /**
-        * Name:        writeAttributes
-        * Parameters:  (void *) - the Libxml's xmlTextWriter pointer
-        * Returns:     (void)
-        * Description: Write the attributes to the current XML element
-        */
-        - (void) writeAttributes: (void*) writer {{% if type.hasComplexBaseClass %}
-        [super writeAttributes: writer];{% /if %}
-        {% for attribute in type.attributes %}
-            {{ attribute.writeCodeForAttribute }}
-        {% /for %}}
-
-        - (void) archiveToWriter: (void*) writer ns:(NSString*)ns{
-            {% if type.hasComplexBaseClass %}self = [super archiveToWriter: writer];{% /if %}
-            [self writeAttributes: writer];
-            {% if type.hasSimpleBaseClass %}
-                {{ type.writeSimpleContent }}
-            {% else %}
-                {% for element in type.elements %}
-                    {{ element.writeCodeForContent }}
-                {% /for %}
-            {% /if %}
-        }
-
+        
         /**
         * Name:        readAttributes
         * Parameters:  (void *) - the Libxml's xmlTextReader pointer
@@ -602,11 +546,101 @@ for (id obj in self.{{ element.variableName }}) {
             {% /for %}{% if type.hasSimpleBaseClass %}
             if(self.value){
                 {% if type.baseClass.hasEnumeration %}[dict setObject:{{ type.baseClass.enumerationName }}ToString(self.value) forKey:@"value"];{% else %}[dict setObject:self.value forKey:@"value"];{% /if %}
-                }{% /if %}
+            }{% /if %}
                 
-                return dict;
+            return dict;
+        }
+        @end
+        
+        @implementation {{ type.targetClassName }} (Writing)
+        
+        - (BOOL) writeAttributes: (void*) writer {
+        {% if type.hasBaseClass %}
+        [super writeAttributes: writer];
+        {% /if %}
+        
+        {% for simpleType in type.simpleTypesInUse %}
+        {{ simpleType.writePrefixCode }}
+        {% /for %}
+        
+        {% for attribute in type.attributes %}
+        {% if attribute.writeCodeForAttribute.length %}
+        {% if attribute.hasEnumeration %}
+        
+        {{ attribute.writeCodeForAttribute }}
+        
+        {% else %}
+        if(self.{{ attribute.variableName }}) {
+            const char* {{ attribute.variableName }}AttrValue = NULL;
+            {{ attribute.writeCodeForAttribute }}
+            int rc = xmlTextWriterWriteAttribute(writer, (xmlChar*)"{{ attribute.name }}", (xmlChar*){{ attribute.variableName }}AttrValue);
+            if (rc < 0) {
+                return NO;
             }
-            @end
+        }
+        {% /if %}
+        {% else %}
+        #warning {{ attribute.variableName }} serializing not working!
+        {% /if %}
+        {% /for %}
+        return YES;
+        }
+        
+        - (BOOL) writeElements: (xmlTextWriterPtr) writer {
+        {% if type.hasBaseClass %}
+        [super writeElements: writer];
+        {% /if %}
+        
+        {% for simpleType in type.simpleTypesInUse %}
+        {{ simpleType.writePrefixCode }}
+        {% /for %}
+        
+        {% for element in type.elements %}
+        {% if element.isSingleValue %}
+        {% if element.hasEnumeration %}
+        {{ element.writeCodeForContent }}
+        {% else %}
+        if(self.{{ element.variableName }}) {
+            xmlTextWriterStartElement(writer, (xmlChar*)"{{ element.name }}");
+            id {{ element.variableName }}Value = self.{{ element.variableName }};
+            if ({{ element.variableName }}Value != nil) {
+                {{ element.writeCodeForContent }}
+            }
+            xmlTextWriterEndElement(writer);
+        }
+        {% /if %}
+        {% else %}
+        for (id {{ element.variableName }}Value in self.{{ element.variableName }}) {
+            xmlTextWriterStartElement(writer, (xmlChar*)"{{ element.name }}");
+            
+            {{ element.writeCodeForContent }}
+            
+            xmlTextWriterEndElement(writer);
+        }
+        {% /if %}
+        {% /for %}
+        
+        return YES;
+        }
+        
+        - (BOOL) writeWithWriter: (void *) writer {
+        if (![self writeAttributes:writer]) {
+            return NO;
+        }
+
+        if (![self writeElements:writer]) {
+            return NO;
+        }
+        
+        {% if type.hasSimpleBaseClass %}
+        if (self.value){
+        {{ type.writeSimpleContent }}
+        }{% /if %}
+        
+        return YES;
+        }
+        
+        @end
             ]]>
             </class>
         </implementation>
@@ -638,6 +672,9 @@ for (id obj in self.{{ element.variableName }}) {
             /* Reads xml text specified by the given data and parses it, returning a {{ type.targetClassName }} */
             + ({{ type.targetClassName }}*){{ type.name }}FromData:(NSData*)data;
 
+            /* Method will write object to data. */
+            + (NSData*)dataFrom{{ type.name }}:({{ type.targetClassName }}*){{ type.name }}Value;
+
             + (void){{ type.name }}:({{ type.targetClassName }} *)obj toPath:(NSString*) path;
             + (void){{ type.name }}:({{ type.targetClassName }} *)obj toURL:(NSURL*) url;
 
@@ -658,23 +695,6 @@ for (id obj in self.{{ element.variableName }}) {
             #import <libxml/xmlwriter.h>
 
             @implementation {{ type.targetClassFileName }} (File)
-
-            + (void){{ type.name }}:({{ type.targetClassName }} *)obj toPath:(NSString*) path {
-                [self {{ type.name }}:obj toURL:[NSURL fileURLWithPath:path]];
-            }
-
-            + (void){{ type.name }}:({{ type.targetClassName }} *)obj toURL:(NSURL*) url {
-                xmlTextWriterPtr writer = xmlNewTextWriterFilename(url.absoluteString.UTF8String, 0);
-                xmlTextWriterStartDocument(writer, "1.0", "utf-8", NULL);
-                xmlTextWriterSetIndent(writer, 1);
-                xmlTextWriterSetIndentString(writer, (xmlChar *)"\t");
-                xmlChar *ns = (xmlChar *)"{{ type.schema.targetNamespace }}";
-                xmlTextWriterStartElementNS(writer, NULL, (xmlChar *)"{{ type.name }}", ns);
-                [obj archiveToWriter:writer ns:nil];
-                xmlTextWriterEndElement(writer);
-                xmlTextWriterEndDocument(writer);
-                xmlFreeTextWriter(writer);
-            }
 
             /**
             * Name:            FromURL
@@ -738,6 +758,54 @@ for (id obj in self.{{ element.variableName }}) {
                 return obj;
             }
             
+            + (NSData*)dataFrom{{ type.name }}:({{ type.targetClassName }}*){{ type.name }}Value {
+            xmlBufferPtr buf = xmlBufferCreate();
+            if (buf == NULL) {
+                NSLog(@"Error creating the xml buffer.");
+                return nil;
+            }
+            
+            xmlTextWriterPtr writer = xmlNewTextWriterMemory(buf, 0);
+            if (writer == NULL) {
+                NSLog(@"Error creating the xml writer.");
+                return nil;
+            }
+            
+            int rc = xmlTextWriterStartDocument(writer, "1.0", "utf-8", NULL);
+            if (rc < 0) {
+                NSLog(@"Error at xmlTextWriterStartDocument.");
+                return nil;
+            }
+            xmlTextWriterSetIndent(writer, 1);
+            xmlTextWriterSetIndentString(writer, (xmlChar *)"\t");
+
+
+            // Serialize object
+            xmlTextWriterStartElementNS(writer, NULL, (xmlChar *)"{{ type.name }}", (xmlChar *)"{{ type.schema.targetNamespace }}");
+            BOOL result = [{{ type.name }}Value writeWithWriter:writer];
+            
+            if (!result) {
+                xmlBufferFree(buf);
+                return nil;
+            }
+            
+            xmlTextWriterEndElement(writer);
+            
+            rc = xmlTextWriterEndDocument(writer);
+            if (rc < 0) {
+                NSLog(@"Error at xmlTextWriterEndDocument.");
+                return nil;
+            }
+            
+            int libxmlVersion = atoi(xmlParserVersion);
+            NSData *xmlData = [[NSData alloc] initWithBytes:(buf->content) length:(buf->use)];
+            //NSLog(@"%s", (const char *) buf->content);
+            
+            xmlBufferFree(buf);
+            
+            return xmlData;
+            }
+            
             @end
             ]]>
             </class>
@@ -769,23 +837,43 @@ for (id obj in self.{{ element.variableName }}) {
         <write>
             <prefix/>
             <attribute><![CDATA[
-            // TODO: Implement write template for enum attribute
             {% if attribute.optional %}
             if (self.{{ attribute.variableName }}HasValue) {
             {% /if %}
-            NSString *{{ attribute.variableName }}Str =  {{ attribute.schemaType.enumerationName }}ToString(self.{{ attribute.variableName }});
-            xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", (xmlChar *)[{{ attribute.variableName }}Str UTF8String]);
+            int write{{ attribute.name }}Code = xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", (xmlChar *)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ attribute.variableName }}) UTF8String]);
+            if (write{{ attribute.name }}Code < 0) {
+                return NO;
+            }
             {% if attribute.optional %}
             }
             {% /if %}
             ]]>
             </attribute>
             <element><![CDATA[
-            // TODO: Implement write template for enum element
+            {% if attribute.optional %}
+            if (self.{{ attribute.variableName }}HasValue) {
+            {% /if %}
+            
+            xmlTextWriterWriteElement(writer, (xmlChar*)"{{ element.name }}", (xmlChar*)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ element.variableName }}) UTF8String]);
+            
+            {% if attribute.optional %}
+            }
+            {% /if %}
             ]]>
             </element>
             <value><![CDATA[
-            // TODO: Implement write template for enum value
+            {% if attribute.optional %}
+            if (self.{{ attribute.variableName }}HasValue) {
+            {% /if %}
+            
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[{{ type.baseClass.enumerationName }}ToString(self.value) UTF8String];
+            if (rc < 0) {
+                return NO;
+            }
+            
+            {% if attribute.optional %}
+            }
+            {% /if %}
             ]]>
             </value>
         </write>
