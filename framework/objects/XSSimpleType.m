@@ -266,9 +266,14 @@
             return NO;
         }
         if(nodes != nil && nodes.count > 0) {
-            self.enumWriteValueCode = [[nodes objectAtIndex: 0] stringValue];
+            self.enumReadValueCode = [[nodes objectAtIndex: 0] stringValue];
         }
         
+        /* Write code */
+        nodes = [enumTypeNode nodesForXPath:@"write[1]/prefix[1]" error: error];
+        if(*error != nil) {
+            return NO;
+        }
         if(nodes != nil && nodes.count > 0) {
             self.enumWritePrefixCode = [[nodes objectAtIndex: 0] stringValue];
         }
@@ -322,11 +327,6 @@
     return [engine processTemplate: self.writeAttributeTemplate withVariables: dict];
 }
 
-- (NSString*) writeCodeForElement: (XSDelement*) element {
-    NSDictionary* dict = [NSDictionary dictionaryWithObject: element forKey: @"element"];
-    return [engine processTemplate: self.writeElementTemplate withVariables: dict];
-}
-
 - (NSString *)readElementTemplate {
     XSSimpleType *t = self.typeForTemplate;
     if(self.hasEnumeration)
@@ -334,12 +334,30 @@
     return t->_readElementTemplate;
 }
 
+- (NSString *)writeElementTemplate {
+    XSSimpleType *t = self.typeForTemplate;
+    if(self.hasEnumeration)
+        return t->_enumWriteElementTemplate;
+    return t->_writeElementTemplate;
+}
+
+
 - (NSString*) readCodeForElement: (XSDelement*) element {
     NSDictionary* dict = [NSDictionary dictionaryWithObject: element forKey: @"element"];
     return [engine processTemplate: self.readElementTemplate withVariables: dict];
 }
 
+- (NSString*) writeCodeForElement: (XSDelement*) element {
+    NSDictionary* dict = [NSDictionary dictionaryWithObject: element forKey: @"element"];
+    return [engine processTemplate: self.writeElementTemplate withVariables: dict];
+}
+
 - (NSString*) readCodeForValue:(NSString*) code {
+    NSDictionary* dict = [NSDictionary dictionaryWithObject: self forKey: @"type"];
+    return [engine processTemplate: code withVariables: dict];
+}
+
+- (NSString*) writeCodeForValue:(NSString*) code {
     NSDictionary* dict = [NSDictionary dictionaryWithObject: self forKey: @"type"];
     return [engine processTemplate: code withVariables: dict];
 }
@@ -351,11 +369,25 @@
     return [t readCodeForValue:t->_readValueCode];
 }
 
+- (NSString *)writeValueCode {
+    XSSimpleType *t = self.typeForTemplate;
+    if(self.hasEnumeration)
+        return [self writeCodeForValue:t->_enumWriteValueCode];
+    return [t writeCodeForValue:t->_writeValueCode];
+}
+
 - (NSString *)readPrefixCode {
     XSSimpleType *t = self.typeForTemplate;
     if(self.hasEnumeration)
         return t->_enumReadPrefixCode;
     return t->_readPrefixCode;
+}
+
+- (NSString *)writePrefixCode {
+    XSSimpleType *t = self.typeForTemplate;
+    if(self.hasEnumeration)
+        return t->_enumWritePrefixCode;
+    return t->_writePrefixCode;
 }
 
 #pragma mark enum support
