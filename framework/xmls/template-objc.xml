@@ -433,25 +433,15 @@
         - (void) readAttributes: (void*) reader {{% if type.hasComplexBaseClass %}
         [super readAttributes: reader];{% /if %}{{ type.combinedReadPrefixCode }}
         {% for attribute in type.attributes %}  char* {{ attribute.name }}AttrValue = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"{{ attribute.name }}");
-        
-        {% if attribute.hasDefault || (attribute.hasEnumeration && attribute.optional) %}
-        NSString *{{ attribute.name }}DefaultAttrValue = nil;
-        
         {% if attribute.hasDefault %}
-        {{ attribute.name }}DefaultAttrValue = @"{{ attribute.defaultValue }}";
-        {% else %}
-        {{ attribute.name }}DefaultAttrValue = {{ attribute.schemaType.enumerationName }}ToString({{ attribute.schemaType.enumerationName }}Unknown);
-        {% /if %}
-        
-        {% /if %}
-        
+        if({{ attribute.name }}AttrValue == nil) {
+            {{ attribute.name }}AttrValue = "{{ attribute.defaultValue }}";
+        }{% /if %}
         if({{ attribute.name }}AttrValue) {
             {{ attribute.readCodeForAttribute }}
             xmlFree({{ attribute.name }}AttrValue);
-        }{% if attribute.hasDefault || (attribute.hasEnumeration && attribute.optional) %} else if ({{ attribute.name }}DefaultAttrValue) {
-            {{ attribute.name }}AttrValue = (char *)[{{ attribute.name }}DefaultAttrValue UTF8String];
-            {{ attribute.readCodeForAttribute }}
-        }{% /if %}
+        }
+        
         {% /for %}}
 
         /**
@@ -560,18 +550,12 @@
         {% /for %}
         
         {% for attribute in type.attributes %}
-        {% if attribute.hasEnumeration %}
-        
-        {{ attribute.writeCodeForAttribute }}
-        
-        {% else %}
         const char* {{ attribute.variableName }}AttrValue = NULL;
         {{ attribute.writeCodeForAttribute }}
-        if ({{ attribute.variableName }}AttrValue != NULL) {
+        if ({{ attribute.variableName }}AttrValue != NULL{% if attribute.hasDefault %} && strcmp({{ attribute.variableName }}AttrValue, "{{ attribute.defaultValue }}") != 0{% /if %}) {
             int statusCode = xmlTextWriterWriteAttribute(writer, (xmlChar*)"{{ attribute.name }}", (xmlChar*){{ attribute.variableName }}AttrValue);
             if (statusCode < 0) return statusCode;
         }
-        {% /if %}
         {% /for %}
         return 0;
         }
@@ -590,12 +574,10 @@
         {% if element.hasEnumeration %}
         {{ element.writeCodeForContent }}
         {% else %}
-        if(self.{{ element.variableName }}) {
+        if (self.{{ element.variableName }}) {
             xmlTextWriterStartElement(writer, (xmlChar*)"{{ element.name }}");
             id {{ element.variableName }}Value = self.{{ element.variableName }};
-            if ({{ element.variableName }}Value != nil) {
-                {{ element.writeCodeForContent }}
-            }
+            {{ element.writeCodeForContent }}
             xmlTextWriterEndElement(writer);
         }
         {% /if %}
@@ -824,10 +806,9 @@
         <write>
             <prefix/>
             <attribute>
-                <![CDATA[{% if attribute.optional %}if (self.{{ attribute.variableName }} != {{ attribute.schemaType.enumerationName }}Unknown {% if attribute.hasDefault %} && self.{{ attribute.variableName }} != {{ attribute.schemaType.enumerationName }}FromString({{ attribute.defaultValue }}) {% /if %}) { {% /if %}
-            int write{{ attribute.name }}Code = xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", (xmlChar *)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ attribute.variableName }}) UTF8String]);
-            if (write{{ attribute.name }}Code < 0) return write{{ attribute.name }}Code;
-            {% if attribute.optional %} } {% /if %}]]>
+                <![CDATA[if (self.{{ attribute.variableName }} != {{ attribute.schemaType.enumerationName }}Unknown) {
+                        {{ attribute.variableName }}AttrValue = [{{ attribute.schemaType.enumerationName }}ToString(self.{{ attribute.variableName }}) UTF8String];
+                    }]]>
             </attribute>
             <element>
                 <![CDATA[xmlTextWriterWriteElement(writer, (xmlChar*)"{{ element.name }}", (xmlChar*)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ element.variableName }}) UTF8String]);]]>
