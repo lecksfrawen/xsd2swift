@@ -375,9 +375,6 @@
         @property (nonatomic, strong) {{ attribute.codeType }}* {{ attribute.variableName }};
         {% /if %}
 
-        {% if attribute.optional %}
-        @property (nonatomic, assign) BOOL {{ attribute.variableName }}HasValue;
-        {% /if %}
         {% /for %}
         {% for element in type.elements %}{% if element.hasAnnotations %}/**
         {{ element.comment }}
@@ -810,9 +807,6 @@
             <attribute>
                 <![CDATA[
             self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}FromString([NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]);
-            {% if attribute.optional %}
-            self.{{ attribute.variableName }}HasValue = YES;
-            {% /if %}
             ]]>
             </attribute>
             <element>
