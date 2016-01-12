@@ -379,7 +379,10 @@
         {% for element in type.elements %}{% if element.hasAnnotations %}/**
         {{ element.comment }}
         */{% /if %}
-        @property (nonatomic, strong) {% if element.hasEnumeration %}{{ element.schemaType.enumerationName }} {% else %}{{ element.codeType }}* {% /if %}{{ element.variableName }};{% /for %}
+        {% if element.hasEnumeration %}
+        @property (nonatomic, assign) {{ element.schemaType.enumerationName }} {{ element.variableName }};
+        {% else %}
+        @property (nonatomic, {% if element.isSingleValue %}strong{% else %}copy{% /if %}) {{ element.codeType }}* {{ element.variableName }};{% /if %}{% /for %}
 
         {% if type.hasSimpleBaseClass %}/**
         the type's underlying value
