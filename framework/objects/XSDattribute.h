@@ -14,6 +14,7 @@
 @property (readonly, nonatomic) NSString* writeCodeForAttribute;
 
 - (BOOL)optional;
+- (BOOL)hasDefault;
 - (NSString*) variableName; //name in generated code
 - (BOOL) hasEnumeration;
 

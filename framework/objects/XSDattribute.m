@@ -75,6 +75,10 @@
     return [_use isEqual:@"optional"];
 }
 
+- (BOOL)hasDefault {
+    return _defaultValue.length > 0;
+}
+
 - (NSString*) variableName {
     return [XSDschema variableNameFromName:self.name multiple:NO];
 }
