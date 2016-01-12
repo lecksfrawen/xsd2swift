@@ -438,7 +438,7 @@
         {% for attribute in type.attributes %}  char* {{ attribute.name }}AttrValue = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"{{ attribute.name }}");
         {% if attribute.hasDefault %}
         if({{ attribute.name }}AttrValue == nil) {
-            {{ attribute.name }}AttrValue = "{{ attribute.defaultValue }}";
+            {{ attribute.name }}AttrValue = (char *)xmlCharStrdup("{{ attribute.defaultValue }}");
         }{% /if %}
         if({{ attribute.name }}AttrValue) {
             {{ attribute.readCodeForAttribute }}
