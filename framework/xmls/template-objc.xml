@@ -29,19 +29,14 @@
         <write>
             <prefix/>
             <attribute>
-                <![CDATA[
-                {{ attribute.variableName }}AttrValue = [self.{{ attribute.variableName }} UTF8String];
-            ]]>
+                <![CDATA[{{ attribute.variableName }}AttrValue = [self.{{ attribute.variableName }} UTF8String];]]>
             </attribute>
-            <element><![CDATA[
-                xmlTextWriterWriteString(writer, (xmlChar*)[{{ element.variableName }}Value UTF8String]);
-            ]]></element>
-            <value><![CDATA[
-                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self.value UTF8String]);
-                if (rc < 0) {
-                    return NO;
-                }
-            ]]>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[{{ element.variableName }}Value UTF8String]);]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)[self.value UTF8String]);
+                if (statusCode < 0) return statusCode;]]>
             </value>
         </write>
     </simpletype>
@@ -67,18 +62,16 @@
         </read>
         <write>
             <prefix/>
-            <attribute><![CDATA[
-                {{ attribute.variableName }}AttrValue = [[self."{{ attribute.variableName }}" absoluteString] UTF8String];
-            ]]></attribute>
-            <element><![CDATA[
-                xmlTextWriterWriteString(writer, (mlChar*)[[self.value absoluteString] UTF8String]);
-            ]]></element>
-            <value><![CDATA[
-                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[self.value absoluteString] UTF8String]);
-                if (rc < 0) {
-                    return NO;
-                }
-            ]]></value>
+            <attribute>
+                <![CDATA[{{ attribute.variableName }}AttrValue = [[self."{{ attribute.variableName }}" absoluteString] UTF8String];]]>
+            </attribute>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, (mlChar*)[[self.value absoluteString] UTF8String]);]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)[[self.value absoluteString] UTF8String]);
+                if (statusCode < 0) return statusCode;]]>
+            </value>
         </write>
     </simpletype>
     <simpletype name="boolean" objType="NSNumber" arrayType="NSArray">
@@ -104,19 +97,15 @@
         </read>
         <write>
             <prefix/>
-            <attribute><![CDATA[{{ attribute.variableName }}AttrValue = [self.{{ attribute.variableName }} boolValue] ? "true" : "false";
-            ]]>
+            <attribute>
+                <![CDATA[{{ attribute.variableName }}AttrValue = [self.{{ attribute.variableName }} boolValue] ? "true" : "false";]]>
             </attribute>
-            <element><![CDATA[
-                xmlTextWriterWriteString(writer, (xmlChar*)([{{ element.variableName }}Value boolValue] ? "true" : "false"));
-            ]]>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)([{{ element.variableName }}Value boolValue] ? "true" : "false"));]]>
             </element>
-            <value><![CDATA[
-                int rc = xmlTextWriterWriteString(writer, (xmlChar*)([{{ element.variableName }}Value boolValue] ? "true" : "false"]]);
-                if (rc < 0) {
-                    return NO;
-                }
-            ]]>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)([{{ element.variableName }}Value boolValue] ? "true" : "false"]]);
+                if (statusCode < 0) return statusCode;]]>
             </value>
         </write>
     </simpletype>
@@ -145,22 +134,20 @@
             </value>
         </read>
         <write>
-            <prefix><![CDATA[NSNumberFormatter* numFormatter = [[NSNumberFormatter alloc] init];
-                numFormatter.numberStyle = NSNumberFormatterDecimalStyle;
-            ]]>
+            <prefix>
+                <![CDATA[NSNumberFormatter* numFormatter = [[NSNumberFormatter alloc] init];
+                numFormatter.numberStyle = NSNumberFormatterDecimalStyle;]]>
             </prefix>
-            <attribute><![CDATA[{{ attribute.variableName }}AttrValue = [[numFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];
-            ]]>
+            <attribute>
+                <![CDATA[{{ attribute.variableName }}AttrValue = [[numFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];]]>
             </attribute>
-            <element><![CDATA[
-                xmlTextWriterWriteString(writer, (xmlChar*)[[numFormatter stringFromNumber:{{ element.variableName }}Value] UTF8String]);
-            ]]></element>
-            <value><![CDATA[
-                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[numFormatter stringFromNumber:self.value] UTF8String]);
-                if (rc < 0) {
-                    return NO;
-                }
-            ]]></value>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[[numFormatter stringFromNumber:{{ element.variableName }}Value] UTF8String]);]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)[[numFormatter stringFromNumber:self.value] UTF8String]);
+                if (statusCode < 0) return statusCode;]]>
+            </value>
         </write>
     </simpletype>
     <simpletype name="decimal" objType="NSNumber"
@@ -189,20 +176,19 @@
             </value>
         </read>
         <write>
-            <prefix><![CDATA[NSNumberFormatter* integerFormatter = [[NSNumberFormatter alloc] init];
+            <prefix>
+                <![CDATA[NSNumberFormatter* integerFormatter = [[NSNumberFormatter alloc] init];
                 integerFormatter.numberStyle = NSNumberFormatterDecimalStyle;]]>
             </prefix>
-            <attribute><![CDATA[{{ attribute.variableName }}AttrValue = [[integerFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];]]>
+            <attribute>
+                <![CDATA[{{ attribute.variableName }}AttrValue = [[integerFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];]]>
             </attribute>
             <element>
                 <![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[[integerFormatter stringFromNumber: {{ element.variableName }}Value] UTF8String]);]]>
             </element>
             <value>
-                <![CDATA[
-                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[integerFormatter stringFromNumber:self.value] UTF8String]);
-                if (rc < 0) {
-                    return NO;
-                }]]>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)[[integerFormatter stringFromNumber:self.value] UTF8String]);
+                if (statusCode < 0) return statusCode;]]>
             </value>
         </write>
     </simpletype>
@@ -231,20 +217,21 @@
             </value>
         </read>
         <write>
-            <prefix><![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter
+            <prefix>
+                <![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter
                 alloc] init];
                 dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";]]>
             </prefix>
-            <attribute><![CDATA[{{ attribute.variableName }}AttrValue = [[dateFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];]]>
+            <attribute>
+                <![CDATA[{{ attribute.variableName }}AttrValue = [[dateFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];]]>
             </attribute>
-            <element><![CDATA[
+            <element>
+                <![CDATA[
                 xmlTextWriterWriteString(writer, (xmlChar*)[[dateFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);]]>
             </element>
-            <value><![CDATA[
-                int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[dateFormatter stringFromDate:self.value] UTF8String]);
-                if (rc < 0) {
-                    return NO;
-                }]]>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)[[dateFormatter stringFromDate:self.value] UTF8String]);
+                if (statusCode < 0) return statusCode;]]>
             </value>
         </write>
     </simpletype>
@@ -274,7 +261,8 @@
             </value>
         </read>
         <write>
-            <prefix><![CDATA[NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter
+            <prefix>
+                <![CDATA[NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter
                 alloc] init];
                 dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
                 dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];]]>
@@ -286,10 +274,8 @@
                 <![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[[dateOnlyFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);]]>
             </element>
             <value>
-                <![CDATA[int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[dateOnlyFormatter stringFromDate:self.value] UTF8String]);
-                if (rc < 0) {
-                    return NO;
-                }]]>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)[[dateOnlyFormatter stringFromDate:self.value] UTF8String]);
+                if (statusCode < 0) return statusCode;]]>
             </value>
         </write>
     </simpletype>
@@ -318,7 +304,8 @@
             </value>
         </read>
         <write>
-            <prefix><![CDATA[NSDateFormatter* timeFormatter = [[NSDateFormatter
+            <prefix>
+                <![CDATA[NSDateFormatter* timeFormatter = [[NSDateFormatter
                 alloc] init];
                 timeFormatter.dateFormat = @"HH:mm:ss";
                 timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];]]>
@@ -326,13 +313,12 @@
             <attribute>
                 <![CDATA[{{ attribute.variableName }}AttrValue = [[timeFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];]]>
             </attribute>
-            <element><![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[[timeFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);]]>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, (xmlChar*)[[timeFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);]]>
             </element>
             <value>
-                <![CDATA[int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[timeFormatter stringFromDate:self.value] UTF8String]);
-                if (rc < 0) {
-                    return NO;
-                }]]>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)[[timeFormatter stringFromDate:self.value] UTF8String]);
+                if (statusCode < 0) return statusCode;]]>
             </value>
         </write>
     </simpletype>
@@ -345,10 +331,8 @@
         </read>
         <write>
             <element>
-                <![CDATA[BOOL result = [{{ element.variableName }}Value writeWithWriter:writer];
-                    if (!result) {
-                        return NO;
-                    }]]>
+                <![CDATA[int statusCode = [{{ element.variableName }}Value writeWithWriter:writer];
+                    if (statusCode < 0) return statusCode;]]>
             </element>
         </write>
         <implementation>
@@ -422,8 +406,8 @@
         @end
         
         @interface {{ type.targetClassName }} (Writing)
-        /* Method serialize object to xml */
-        - (BOOL) writeWithWriter: (void*) writer;
+        /* Method serialize object to xml and return status code. */
+        - (int) writeWithWriter: (void*) writer;
         @end
         ]]>
             </header>
@@ -452,10 +436,25 @@
         - (void) readAttributes: (void*) reader {{% if type.hasComplexBaseClass %}
         [super readAttributes: reader];{% /if %}{{ type.combinedReadPrefixCode }}
         {% for attribute in type.attributes %}  char* {{ attribute.name }}AttrValue = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"{{ attribute.name }}");
+        
+        {% if attribute.hasDefault || (attribute.hasEnumeration && attribute.optional) %}
+        NSString *{{ attribute.name }}DefaultAttrValue = nil;
+        
+        {% if attribute.hasDefault %}
+        {{ attribute.name }}DefaultAttrValue = @"{{ attribute.defaultValue }}";
+        {% else %}
+        {{ attribute.name }}DefaultAttrValue = {{ attribute.schemaType.enumerationName }}ToString({{ attribute.schemaType.enumerationName }}Unknown);
+        {% /if %}
+        
+        {% /if %}
+        
         if({{ attribute.name }}AttrValue) {
             {{ attribute.readCodeForAttribute }}
             xmlFree({{ attribute.name }}AttrValue);
-        }
+        }{% if attribute.hasDefault || (attribute.hasEnumeration && attribute.optional) %} else if ({{ attribute.name }}DefaultAttrValue) {
+            {{ attribute.name }}AttrValue = (char *)[{{ attribute.name }}DefaultAttrValue UTF8String];
+            {{ attribute.readCodeForAttribute }}
+        }{% /if %}
         {% /for %}}
 
         /**
@@ -554,7 +553,7 @@
         
         @implementation {{ type.targetClassName }} (Writing)
         
-        - (BOOL) writeAttributes: (void*) writer {
+        - (int) writeAttributes: (void*) writer {
         {% if type.hasBaseClass %}
         [super writeAttributes: writer];
         {% /if %}
@@ -564,29 +563,23 @@
         {% /for %}
         
         {% for attribute in type.attributes %}
-        {% if attribute.writeCodeForAttribute.length %}
         {% if attribute.hasEnumeration %}
         
         {{ attribute.writeCodeForAttribute }}
         
         {% else %}
-        if(self.{{ attribute.variableName }}) {
-            const char* {{ attribute.variableName }}AttrValue = NULL;
-            {{ attribute.writeCodeForAttribute }}
-            int rc = xmlTextWriterWriteAttribute(writer, (xmlChar*)"{{ attribute.name }}", (xmlChar*){{ attribute.variableName }}AttrValue);
-            if (rc < 0) {
-                return NO;
-            }
+        const char* {{ attribute.variableName }}AttrValue = NULL;
+        {{ attribute.writeCodeForAttribute }}
+        if ({{ attribute.variableName }}AttrValue != NULL) {
+            int statusCode = xmlTextWriterWriteAttribute(writer, (xmlChar*)"{{ attribute.name }}", (xmlChar*){{ attribute.variableName }}AttrValue);
+            if (statusCode < 0) return statusCode;
         }
-        {% /if %}
-        {% else %}
-        #warning {{ attribute.variableName }} serializing not working!
         {% /if %}
         {% /for %}
-        return YES;
+        return 0;
         }
         
-        - (BOOL) writeElements: (xmlTextWriterPtr) writer {
+        - (int) writeElements: (xmlTextWriterPtr) writer {
         {% if type.hasBaseClass %}
         [super writeElements: writer];
         {% /if %}
@@ -620,24 +613,24 @@
         {% /if %}
         {% /for %}
         
-        return YES;
+        return 0;
         }
         
-        - (BOOL) writeWithWriter: (void *) writer {
-        if (![self writeAttributes:writer]) {
-            return NO;
-        }
+        - (int) writeWithWriter: (void *) writer {
+        int statusCode = 0;
+        
+        statusCode = [self writeAttributes:writer];
+        if (statusCode < 0) return statusCode;
 
-        if (![self writeElements:writer]) {
-            return NO;
-        }
+        statusCode = [self writeElements:writer];
+        if (statusCode < 0) return statusCode;
         
         {% if type.hasSimpleBaseClass %}
         if (self.value){
         {{ type.writeSimpleContent }}
         }{% /if %}
         
-        return YES;
+        return statusCode;
         }
         
         @end
@@ -782,9 +775,9 @@
 
             // Serialize object
             xmlTextWriterStartElementNS(writer, NULL, (xmlChar *)"{{ type.name }}", (xmlChar *)"{{ type.schema.targetNamespace }}");
-            BOOL result = [{{ type.name }}Value writeWithWriter:writer];
+            int resultStatusCode = [{{ type.name }}Value writeWithWriter:writer];
             
-            if (!result) {
+            if (resultStatusCode < 0) {
                 xmlBufferFree(buf);
                 return nil;
             }
@@ -836,45 +829,18 @@
         </read>
         <write>
             <prefix/>
-            <attribute><![CDATA[
-            {% if attribute.optional %}
-            if (self.{{ attribute.variableName }}HasValue) {
-            {% /if %}
+            <attribute>
+                <![CDATA[{% if attribute.optional %}if (self.{{ attribute.variableName }} != {{ attribute.schemaType.enumerationName }}Unknown {% if attribute.hasDefault %} && self.{{ attribute.variableName }} != {{ attribute.schemaType.enumerationName }}FromString({{ attribute.defaultValue }}) {% /if %}) { {% /if %}
             int write{{ attribute.name }}Code = xmlTextWriterWriteAttribute(writer, (xmlChar *)"{{ attribute.name }}", (xmlChar *)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ attribute.variableName }}) UTF8String]);
-            if (write{{ attribute.name }}Code < 0) {
-                return NO;
-            }
-            {% if attribute.optional %}
-            }
-            {% /if %}
-            ]]>
+            if (write{{ attribute.name }}Code < 0) return write{{ attribute.name }}Code;
+            {% if attribute.optional %} } {% /if %}]]>
             </attribute>
-            <element><![CDATA[
-            {% if attribute.optional %}
-            if (self.{{ attribute.variableName }}HasValue) {
-            {% /if %}
-            
-            xmlTextWriterWriteElement(writer, (xmlChar*)"{{ element.name }}", (xmlChar*)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ element.variableName }}) UTF8String]);
-            
-            {% if attribute.optional %}
-            }
-            {% /if %}
-            ]]>
+            <element>
+                <![CDATA[xmlTextWriterWriteElement(writer, (xmlChar*)"{{ element.name }}", (xmlChar*)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ element.variableName }}) UTF8String]);]]>
             </element>
-            <value><![CDATA[
-            {% if attribute.optional %}
-            if (self.{{ attribute.variableName }}HasValue) {
-            {% /if %}
-            
-            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[{{ type.baseClass.enumerationName }}ToString(self.value) UTF8String];
-            if (rc < 0) {
-                return NO;
-            }
-            
-            {% if attribute.optional %}
-            }
-            {% /if %}
-            ]]>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, (xmlChar*)[{{ type.baseClass.enumerationName }}ToString(self.value) UTF8String];
+            if (statusCode < 0) return statusCode;]]>
             </value>
         </write>
         <implementation>
