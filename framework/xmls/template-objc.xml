@@ -488,7 +488,7 @@
                             {{ type.readSimpleContent }}
                         }
                     } else {% /if %} {
-                        NSLog(@"Ignoring unexpected: %@", _currentElementName);
+                        NSLog(@"%s: Ignoring unexpected: %@", __PRETTY_FUNCTION__, _currentElementName);
                         break;
                     }
                 }
@@ -650,9 +650,6 @@
             /* Method will write object to data. */
             + (NSData*)dataFrom{{ type.name }}:({{ type.targetClassName }}*){{ type.name }}Value;
 
-            + (void){{ type.name }}:({{ type.targetClassName }} *)obj toPath:(NSString*) path;
-            + (void){{ type.name }}:({{ type.targetClassName }} *)obj toURL:(NSURL*) url;
-
             @end
             ]]>
             </header>
@@ -772,7 +769,6 @@
                 return nil;
             }
             
-            int libxmlVersion = atoi(xmlParserVersion);
             NSData *xmlData = [[NSData alloc] initWithBytes:(buf->content) length:(buf->use)];
             //NSLog(@"%s", (const char *) buf->content);
             
