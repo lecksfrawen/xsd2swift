@@ -436,9 +436,9 @@
         - (void) readAttributes: (void*) reader {{% if type.hasComplexBaseClass %}
         [super readAttributes: reader];{% /if %}{{ type.combinedReadPrefixCode }}
         {% for attribute in type.attributes %}  char* {{ attribute.name }}AttrValue = (char*) xmlTextReaderGetAttribute(reader, (xmlChar*)"{{ attribute.name }}");
-        {% if attribute.hasDefault %}
-        if({{ attribute.name }}AttrValue == nil) {
-            {{ attribute.name }}AttrValue = (char *)xmlCharStrdup("{{ attribute.defaultValue }}");
+        {% if attribute.hasDefault or attribute.hasEnumeration %}
+        if(!{{ attribute.name }}AttrValue) {
+            {{ attribute.name }}AttrValue = (char *)xmlCharStrdup({% if attribute.hasDefault %}"{{ attribute.defaultValue }}"{% else %}"Unknown"{% /if %});
         }{% /if %}
         if({{ attribute.name }}AttrValue) {
             {{ attribute.readCodeForAttribute }}
