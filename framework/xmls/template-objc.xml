@@ -7,9 +7,8 @@
         <read>
             <prefix/>
             <attribute><![CDATA[
-                self.{{ attribute.variableName }} = [NSString
-                stringWithCString:{{ attribute.name }}AttrValue
-                encoding:NSUTF8StringEncoding];{% /if %}
+                self.{{ attribute.variableName }} = [NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding];
+                {% /if %}
                 ]]>
             </attribute>
             <element>
@@ -18,11 +17,9 @@
         {% else %}[{{ element.variableName }}Array addObject:[NSString stringWithCString:{{element.name}}ElementValue encoding:NSUTF8StringEncoding]];{% /if %}]]>
             </element>
             <value><![CDATA[
-                NSString *value = [NSString stringWithCString:
-                contentValue encoding: NSUTF8StringEncoding]; value = [value
-                stringByTrimmingCharactersInSet:[NSCharacterSet
-                whitespaceAndNewlineCharacterSet]]; self.value =
-                value;
+                NSString *value = [NSString stringWithCString:contentValue encoding: NSUTF8StringEncoding];
+                value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                self.value = value;
                 ]]>
             </value>
         </read>
@@ -43,9 +40,7 @@
     <simpletype name="anyURI" objType="NSURL" arrayType="NSArray">
         <read>
             <prefix/>
-            <attribute>self.{{ attribute.variableName }} = [NSURL
-                URLWithString:[NSString stringWithCString:{{ attribute.name
-                }}AttrValue encoding:NSUTF8StringEncoding]];
+            <attribute>self.{{ attribute.variableName }} = [NSURL URLWithString:[NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
             </attribute>
             <element>
                 <![CDATA[
@@ -53,11 +48,9 @@
         {% /if %}
         ]]>
             </element>
-            <value>NSString *value = [NSString stringWithCString:
-                contentValue encoding: NSUTF8StringEncoding]; value = [value
-                stringByTrimmingCharactersInSet:[NSCharacterSet
-                whitespaceAndNewlineCharacterSet]]; self.value = [NSURL
-                URLWithString:value];
+            <value>NSString *value = [NSString stringWithCString:contentValue encoding: NSUTF8StringEncoding];
+                value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                self.value = [NSURL URLWithString:value];
             </value>
         </read>
         <write>
@@ -77,22 +70,16 @@
     <simpletype name="boolean" objType="NSNumber" arrayType="NSArray">
         <read>
             <prefix/>
-            <attribute>self.{{ attribute.variableName }} = [NSNumber
-                numberWithBool: [[NSString stringWithCString: {{
-                attribute.name }}AttrValue encoding: NSUTF8StringEncoding]
-                isEqualToString: @"true"]];
+            <attribute>self.{{ attribute.variableName }} = [NSNumber numberWithBool: [[NSString stringWithCString: {{ attribute.name }}AttrValue encoding: NSUTF8StringEncoding] isEqualToString: @"true"]];
             </attribute>
             <element>
                 <![CDATA[
         self.{{ element.variableName }} = [NSNumber numberWithBool:[[NSString stringWithCString:{{element.name}}ElementValue encoding:NSUTF8StringEncoding] isEqualToString:@"true"]];
         ]]>
             </element>
-            <value>NSString *value = [NSString
-                stringWithCString:contentValue
-                encoding:NSUTF8StringEncoding]; value = [value
-                stringByTrimmingCharactersInSet:[NSCharacterSet
-                whitespaceAndNewlineCharacterSet]]; self.value = [NSNumber
-                numberWithBool:[value isEqualToString:@"true"]];
+            <value>NSString *value = [NSString stringWithCString:contentValue encoding:NSUTF8StringEncoding];
+                value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                self.value = [NSNumber numberWithBool:[value isEqualToString:@"true"]];
             </value>
         </read>
         <write>
@@ -111,26 +98,19 @@
     </simpletype>
     <simpletype name="integer" objType="NSNumber" arrayType="NSArray">
         <read>
-            <prefix>NSNumberFormatter* numFormatter = [[NSNumberFormatter
-                alloc] init]; numFormatter.numberStyle =
-                NSNumberFormatterDecimalStyle;
+            <prefix>NSNumberFormatter *numFormatter = [[NSNumberFormatter alloc] init];
+                numFormatter.numberStyle = NSNumberFormatterDecimalStyle;
             </prefix>
-            <attribute>self.{{ attribute.variableName }} = [numFormatter
-                numberFromString:[NSString stringWithCString:{{
-                attribute.name }}AttrValue
-                encoding:NSUTF8StringEncoding]];
+            <attribute>self.{{ attribute.variableName }} = [numFormatter numberFromString:[NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
             </attribute>
             <element>
                 <![CDATA[
         self.{{ element.variableName }} = [numFormatter numberFromString:[NSString stringWithCString:{{element.name}}ElementValue encoding:NSUTF8StringEncoding]];
         ]]>
             </element>
-            <value>NSString *value = [NSString
-                stringWithCString:contentValue
-                encoding:NSUTF8StringEncoding]; value = [value
-                stringByTrimmingCharactersInSet:[NSCharacterSet
-                whitespaceAndNewlineCharacterSet]]; self.value =
-                [numFormatter numberFromString:value];
+            <value>NSString *value = [NSString stringWithCString:contentValue encoding:NSUTF8StringEncoding];
+                value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                self.value = [numFormatter numberFromString:value];
             </value>
         </read>
         <write>
@@ -153,26 +133,20 @@
     <simpletype name="decimal" objType="NSNumber"
                 arrayType="NSArray">
         <read>
-            <prefix>NSNumberFormatter* decFormatter = [[NSNumberFormatter
-                alloc] init]; decFormatter.decimalSeparator = @".";
-                decFormatter.numberStyle =
-                NSNumberFormatterDecimalStyle;
+            <prefix>NSNumberFormatter* decFormatter = [[NSNumberFormatter alloc] init];
+                decFormatter.decimalSeparator = @".";
+                decFormatter.numberStyle = NSNumberFormatterDecimalStyle;
             </prefix>
-            <attribute>self.{{ attribute.variableName }} = [decFormatter
-                numberFromString: [NSString stringWithCString: {{
-                attribute.name }}AttrValue encoding:
-                NSUTF8StringEncoding]];
+            <attribute>self.{{ attribute.variableName }} = [decFormatter numberFromString: [NSString stringWithCString: {{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
             </attribute>
             <element>
                 <![CDATA[
         self.{{ element.variableName }} = [decFormatter numberFromString: [NSString stringWithCString: {{element.name}}ElementValue encoding: NSUTF8StringEncoding]];
         ]]>
             </element>
-            <value>NSString *value = [NSString stringWithCString:
-                contentValue encoding: NSUTF8StringEncoding]; value = [value
-                stringByTrimmingCharactersInSet:[NSCharacterSet
-                whitespaceAndNewlineCharacterSet]]; self.value =
-                [decFormatter numberFromString: value];
+            <value>NSString *value = [NSString stringWithCString:contentValue encoding:NSUTF8StringEncoding];
+                value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                self.value = [decFormatter numberFromString:value];
             </value>
         </read>
         <write>
@@ -194,13 +168,10 @@
     </simpletype>
     <simpletype name="dateTime" objType="NSDate" arrayType="NSArray">
         <read>
-            <prefix><![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter
-                alloc] init];
+            <prefix><![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
                 dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";]]>
             </prefix>
-            <attribute>self.{{ attribute.variableName }} = [dateFormatter
-                dateFromString:[NSString stringWithCString:{{ attribute.name
-                }}AttrValue encoding:NSUTF8StringEncoding]];
+            <attribute>self.{{ attribute.variableName }} = [dateFormatter dateFromString:[NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
             </attribute>
             <element>
                 <![CDATA[
@@ -208,18 +179,14 @@
         {% /if %}
         ]]>
             </element>
-            <value>NSString *value = [NSString
-                stringWithCString:contentValue
-                encoding:NSUTF8StringEncoding]; value = [value
-                stringByTrimmingCharactersInSet:[NSCharacterSet
-                whitespaceAndNewlineCharacterSet]]; self.value =
-                [dateFormatter dateFromString:value];
+            <value>NSString *value = [NSString stringWithCString:contentValue encoding:NSUTF8StringEncoding];
+                value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                self.value = [dateFormatter dateFromString:value];
             </value>
         </read>
         <write>
             <prefix>
-                <![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter
-                alloc] init];
+                <![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
                 dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";]]>
             </prefix>
             <attribute>
@@ -237,14 +204,11 @@
     </simpletype>
     <simpletype name="date" objType="NSDate" arrayType="NSArray">
         <read>
-            <prefix>NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter
-                alloc] init];
+            <prefix>NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter alloc] init];
                 dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
                 dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
             </prefix>
-            <attribute>self.{{ attribute.variableName }} = [dateOnlyFormatter
-                dateFromString:[NSString stringWithCString:{{ attribute.name
-                }}AttrValue encoding:NSUTF8StringEncoding]];
+            <attribute>self.{{ attribute.variableName }} = [dateOnlyFormatter dateFromString:[NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
             </attribute>
             <element>
                 <![CDATA[
@@ -252,18 +216,14 @@
                   {% /if %}
               ]]>
             </element>
-            <value>NSString *value = [NSString
-                stringWithCString:contentValue
-                encoding:NSUTF8StringEncoding]; value = [value
-                stringByTrimmingCharactersInSet:[NSCharacterSet
-                whitespaceAndNewlineCharacterSet]]; self.value =
-                [dateOnlyFormatter dateFromString:value];
+            <value>NSString *value = [NSString stringWithCString:contentValue encoding:NSUTF8StringEncoding];
+                value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                self.value = [dateOnlyFormatter dateFromString:value];
             </value>
         </read>
         <write>
             <prefix>
-                <![CDATA[NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter
-                alloc] init];
+                <![CDATA[NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter alloc] init];
                 dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
                 dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];]]>
             </prefix>
@@ -285,9 +245,7 @@
                 timeFormatter.dateFormat = @"HH:mm:ss";
                 timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
             </prefix>
-            <attribute>self.{{ attribute.variableName }} = [timeFormatter
-                dateFromString:[NSString stringWithCString:{{ attribute.name
-                }}AttrValue encoding:NSUTF8StringEncoding]];
+            <attribute>self.{{ attribute.variableName }} = [timeFormatter dateFromString:[NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
             </attribute>
             <element>
                 <![CDATA[
@@ -295,18 +253,14 @@
                   {% /if %}
               ]]>
             </element>
-            <value>NSString *value = [NSString
-                stringWithCString:contentValue
-                encoding:NSUTF8StringEncoding]; value = [value
-                stringByTrimmingCharactersInSet:[NSCharacterSet
-                whitespaceAndNewlineCharacterSet]]; self.value =
-                [timeFormatter dateFromString:value];
+            <value>NSString *value = [NSString stringWithCString:contentValue encoding:NSUTF8StringEncoding];
+                value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                self.value = [timeFormatter dateFromString:value];
             </value>
         </read>
         <write>
             <prefix>
-                <![CDATA[NSDateFormatter* timeFormatter = [[NSDateFormatter
-                alloc] init];
+                <![CDATA[NSDateFormatter* timeFormatter = [[NSDateFormatter alloc] init];
                 timeFormatter.dateFormat = @"HH:mm:ss";
                 timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];]]>
             </prefix>
@@ -424,6 +378,21 @@
         #import <libxml/xmlwriter.h>
         {% for complexType in type.complexTypesInUse %}
         #import "{{ complexType.targetClassFileName }}.h"{% /for %}
+
+        {% if type.hasComplexBaseClass %}
+        /**
+        *   Create unnamed category for {{ type.baseClass.targetClassName }} to identify methods for serialize.
+        */
+        @interface {{ type.baseClass.targetClassName }} ()
+        
+        /* Method serialize attributes of object and return status code. NOTE: Do not call this method directly. */
+        - (int) writeElements: (xmlTextWriterPtr) writer;
+        
+        /* Method serialize attributes of object and return status code. NOTE: Do not call this method directly. */
+        - (int) writeAttributes: (void*) writer;
+        
+        @end
+        {% /if %}
 
         @implementation {{ type.targetClassName }}
         
@@ -544,7 +513,7 @@
         @implementation {{ type.targetClassName }} (Writing)
         
         - (int) writeAttributes: (void*) writer {
-        {% if type.hasBaseClass %}
+        {% if type.hasComplexBaseClass %}
         [super writeAttributes: writer];
         {% /if %}
         
@@ -564,7 +533,7 @@
         }
         
         - (int) writeElements: (xmlTextWriterPtr) writer {
-        {% if type.hasBaseClass %}
+        {% if type.hasComplexBaseClass %}
         [super writeElements: writer];
         {% /if %}
         
