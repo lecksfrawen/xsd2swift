@@ -98,7 +98,8 @@
     </simpletype>
     <simpletype name="integer" objType="NSNumber" arrayType="NSArray">
         <read>
-            <prefix>NSNumberFormatter *numFormatter = [[NSNumberFormatter alloc] init];
+            <prefix>
+                NSNumberFormatter *numFormatter = [[NSNumberFormatter alloc] init];
                 numFormatter.numberStyle = NSNumberFormatterDecimalStyle;
             </prefix>
             <attribute>self.{{ attribute.variableName }} = [numFormatter numberFromString:[NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
@@ -115,8 +116,8 @@
         </read>
         <write>
             <prefix>
-                <![CDATA[NSNumberFormatter* numFormatter = [[NSNumberFormatter alloc] init];
-                numFormatter.numberStyle = NSNumberFormatterDecimalStyle;]]>
+                    NSNumberFormatter* numFormatter = [[NSNumberFormatter alloc] init];
+                    numFormatter.numberStyle = NSNumberFormatterDecimalStyle;
             </prefix>
             <attribute>
                 <![CDATA[{{ attribute.variableName }}AttrValue = [[numFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];]]>
@@ -133,7 +134,8 @@
     <simpletype name="decimal" objType="NSNumber"
                 arrayType="NSArray">
         <read>
-            <prefix>NSNumberFormatter* decFormatter = [[NSNumberFormatter alloc] init];
+            <prefix>
+                NSNumberFormatter* decFormatter = [[NSNumberFormatter alloc] init];
                 decFormatter.decimalSeparator = @".";
                 decFormatter.numberStyle = NSNumberFormatterDecimalStyle;
             </prefix>
@@ -168,8 +170,9 @@
     </simpletype>
     <simpletype name="dateTime" objType="NSDate" arrayType="NSArray">
         <read>
-            <prefix><![CDATA[NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-                dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";]]>
+            <prefix>
+                NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+                dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
             </prefix>
             <attribute>self.{{ attribute.variableName }} = [dateFormatter dateFromString:[NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
             </attribute>
@@ -204,7 +207,8 @@
     </simpletype>
     <simpletype name="date" objType="NSDate" arrayType="NSArray">
         <read>
-            <prefix>NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter alloc] init];
+            <prefix>
+                NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter alloc] init];
                 dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
                 dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
             </prefix>
@@ -223,9 +227,9 @@
         </read>
         <write>
             <prefix>
-                <![CDATA[NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter alloc] init];
+                NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter alloc] init];
                 dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
-                dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];]]>
+                dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
             </prefix>
             <attribute>
                 <![CDATA[{{ attribute.variableName }}AttrValue = [[dateOnlyFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];]]>
@@ -241,7 +245,8 @@
     </simpletype>
     <simpletype name="time" objType="NSDate" arrayType="NSArray">
         <read>
-            <prefix>NSDateFormatter* timeFormatter = [[NSDateFormatter alloc] init];
+            <prefix>
+                NSDateFormatter* timeFormatter = [[NSDateFormatter alloc] init];
                 timeFormatter.dateFormat = @"HH:mm:ss";
                 timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
             </prefix>
@@ -260,9 +265,9 @@
         </read>
         <write>
             <prefix>
-                <![CDATA[NSDateFormatter* timeFormatter = [[NSDateFormatter alloc] init];
+                NSDateFormatter* timeFormatter = [[NSDateFormatter alloc] init];
                 timeFormatter.dateFormat = @"HH:mm:ss";
-                timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];]]>
+                timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
             </prefix>
             <attribute>
                 <![CDATA[{{ attribute.variableName }}AttrValue = [[timeFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];]]>
