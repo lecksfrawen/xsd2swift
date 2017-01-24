@@ -177,6 +177,33 @@
     return [simpleTypes allObjects];
 }
 
+- (NSArray*) uniqueTemplateTypes {
+    NSMutableSet* uniqueTemplateTypes = [NSMutableSet set];
+    
+    for (XSDattribute *anAttr in [self attributes]) {
+        XSSimpleType *type = [self.schema typeForName: anAttr.type];
+        [uniqueTemplateTypes addObject:type.typeForTemplate];
+    }
+    
+    for (XSDelement* anElement in [self elements]) {
+        id<XSType> aType = anElement.schemaType;
+        if([aType isKindOfClass: [XSSimpleType class]]) {
+            [uniqueTemplateTypes addObject:[(id)aType typeForTemplate]];
+        }
+    }
+    
+    //also add base type if needed
+    id baseType = self.baseType;
+    if(baseType != nil) {
+        id<XSType> t = [self.schema typeForName: baseType];
+        if(t != nil && [t isKindOfClass:[XSSimpleType class]]) {
+            [uniqueTemplateTypes addObject:[(id)t typeForTemplate]];
+        }
+    }
+    
+    return [uniqueTemplateTypes allObjects];
+}
+
 - (NSArray*) complexTypesInUse {
     NSMutableSet* complexTypes = [NSMutableSet set];
     id<XSType> aType;

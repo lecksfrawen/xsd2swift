@@ -35,6 +35,8 @@
 - (id) initWithNode: (NSXMLElement*) node schema: (XSDschema*) schema;
 - (id) initWithName: (NSString*) name baseType: (NSString*)baseType schema: (XSDschema*) schema;
 
+- (XSSimpleType *)typeForTemplate;
+
 //enum support
 - (BOOL) hasEnumeration;
 - (NSArray *) enumerationValues;

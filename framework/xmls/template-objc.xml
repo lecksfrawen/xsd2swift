@@ -100,6 +100,7 @@
         <read>
             <prefix>
                 NSNumberFormatter *numFormatter = [[NSNumberFormatter alloc] init];
+                numFormatter.locale = self.locale;
                 numFormatter.numberStyle = NSNumberFormatterDecimalStyle;
             </prefix>
             <attribute>self.{{ attribute.variableName }} = [numFormatter numberFromString:[NSString stringWithCString:{{ attribute.name }}AttrValue encoding:NSUTF8StringEncoding]];
@@ -116,7 +117,8 @@
         </read>
         <write>
             <prefix>
-                    NSNumberFormatter* numFormatter = [[NSNumberFormatter alloc] init];
+                    NSNumberFormatter *numFormatter = [[NSNumberFormatter alloc] init];
+                    numFormatter.locale = self.locale;
                     numFormatter.numberStyle = NSNumberFormatterDecimalStyle;
             </prefix>
             <attribute>
@@ -154,6 +156,7 @@
         <write>
             <prefix>
                 <![CDATA[NSNumberFormatter* integerFormatter = [[NSNumberFormatter alloc] init];
+                    integerFormatter.locale = self.locale;
                 integerFormatter.numberStyle = NSNumberFormatterDecimalStyle;]]>
             </prefix>
             <attribute>
@@ -601,7 +604,7 @@
         [super writeAttributes: writer];
         {% /if %}
         
-        {% for simpleType in type.simpleTypesInUse %}
+        {% for simpleType in type.uniqueTemplateTypes %}
         {{ simpleType.writePrefixCode }}
         {% /for %}
         
@@ -621,7 +624,7 @@
         [super writeElements: writer];
         {% /if %}
         
-        {% for simpleType in type.simpleTypesInUse %}
+        {% for simpleType in type.uniqueTemplateTypes %}
         {{ simpleType.writePrefixCode }}
         {% /for %}
         
@@ -910,7 +913,7 @@
             {{ type.enumerationName }} {{ type.enumerationName }}FromString(NSString *enumString) {
                 NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
                 NSNumberFormatter *numFormatter = [[NSNumberFormatter alloc] init];
-                numFormatter.locale =locale;
+                numFormatter.locale = locale;
 
                 if([numFormatter numberFromString:enumString]) {
                     enumString = [@"Value" stringByAppendingString:enumString];
