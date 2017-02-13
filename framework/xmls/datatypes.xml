@@ -62,5 +62,6 @@
 <!--<type base="hexBinary" name="hexBinary"/>-->
 
 <type base="any" name="any"/>
+<type base="any" name="anyType"/>
 
 </datatypes>
