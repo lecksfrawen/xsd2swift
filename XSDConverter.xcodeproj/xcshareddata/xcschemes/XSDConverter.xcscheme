@@ -65,6 +65,11 @@
                BlueprintName = "XSDConverterCoreTests"
                ReferencedContainer = "container:XSDConverter.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "AddressTestsObjC/testCorrectnessGeneratingParser">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>

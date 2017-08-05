@@ -14,6 +14,7 @@
 
 @property (readonly, nonatomic) id<XSType> localType;
 @property (readonly, nonatomic) NSString* name;
+@property (readonly, nonatomic) NSString* ref;
 @property (readonly, nonatomic) NSString* type;
 @property (readonly, nonatomic) NSString* substitutionGroup;
 @property (readonly, nonatomic) NSString* defaultValue;
@@ -26,6 +27,8 @@
 @property (readonly, nonatomic) NSNumber* minOccurs;
 @property (readonly, nonatomic) NSNumber* maxOccurs;
 
+- (id) initWithNode:(NSXMLElement*)node schema:(XSDschema*)schema minOccurs:(NSNumber *)minOccurs maxOccurs:(NSNumber *)maxOccurs;
+
 - (NSString*) readCodeForContent;
 - (NSString*) writeCodeForContent;
 - (NSString*) variableName; //in generated code
@@ -35,5 +38,6 @@
 - (id<XSType>) schemaType;
 - (BOOL) hasEnumeration;
 - (NSString*) codeType;
+- (BOOL) hasAny;
 
 @end
