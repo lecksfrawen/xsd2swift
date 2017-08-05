@@ -1,485 +1,840 @@
 <template xmlns="http://www.example.com/xsd2cocoa"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
-  <format_style type="builtin"/>
-  <additional_file path="libxml-bridging-header.header"
-  target_path="libxml-bridging-header.h" />
-  <!-- known simpletypes-->
-  <simpletype name="string" objType="String" arrayType="[String]">
-    <read>
-      <prefix></prefix>
-      <attribute>
-        <![CDATA[
-        {% if attribute.hasEnumeration %}self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))){% else %}self.{{ attribute.variableName }} = String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)){% /if %}]]>
-        </attribute>
-      <element>
-        <![CDATA[
-            {% if element.isSingleValue %}self.{{ element.variableName }} = String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))
-            {% else %}{{ element.variableName }}Array.append(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))){% /if %}]]>
-        </element>
-      <value>
-        <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-        self.value = value]]>
-        </value>
-    </read>
-  </simpletype>
-  <simpletype name="anyURI" objType="NSURL" arrayType="[NSURL]">
-    <read>
-      <prefix></prefix>
-      <attribute>
-        <![CDATA[
-        self.{{ attribute.variableName }} = NSURL(string: String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
-        </attribute>
-      <element>
-          <![CDATA[
-              {% if element.isSingleValue %}self.{{ element.variableName }} = NSURL(string: String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-              {% else %}{{ element.variableName }}Array.append(NSURL(string: String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad unwrapping{% /if %}]]>
-        </element>
-      <value>
-        <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-        self.value = NSURL(string: value)]]>
-        </value>
-    </read>
-  </simpletype>
-  <simpletype name="boolean" objType="Bool" arrayType="[Bool]">
-    <read>
-      <prefix></prefix>
-      <attribute>
-        <![CDATA[
-        self.{{ attribute.variableName }} = (String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)) == "true")]]>
-        </attribute>
-      <element>
-          <![CDATA[
-              {% if element.isSingleValue %}self.{{ element.variableName }} = String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue)) == "true"
-              {% else %}{{ element.variableName }}Array.append(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue)) == "true"){% /if %}]]>
-        </element>
-      <value>
-        <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-        self.value = (value == "true")]]>
-        </value>
-    </read>
-  </simpletype>
-  <simpletype name="integer" objType="Int" arrayType="[Int]">
-    <read>
-      <prefix>
-        <![CDATA[
-        let numFormatter = NSNumberFormatter()
-        numFormatter.numberStyle = NSNumberFormatterStyle.DecimalStyle
-        numFormatter.locale = self.locale
-        ]]>
-        </prefix>
-      <attribute>
-        <![CDATA[
-        self.{{ attribute.variableName }} = numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)!.integerValue]]>
-        </attribute>
-      <element>
-          <![CDATA[
-              {% if element.isSingleValue %}self.{{ element.variableName }} = numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.integerValue
-              {% else %}{{ element.variableName }}Array.append(numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.integerValue)  //bad force unwrapping{% /if %}]]>
-        </element>
-      <value>
-        <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-        if value != nil {
-            let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            self.value = numFormatter.numberFromString(trimmed).integerValue
-        }]]>
-        </value>
-    </read>
-  </simpletype>
-  <simpletype name="decimal" objType="Double" arrayType="[Double]">
-    <read>
-      <prefix>
-        <![CDATA[
-        let decFormatter = NSNumberFormatter()
-        decFormatter.numberStyle = NSNumberFormatterStyle.DecimalStyle
-        decFormatter.locale = self.locale]]>
-        </prefix>
-      <attribute>
-        <![CDATA[
-        self.{{ attribute.variableName }} = decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)!.doubleValue]]>
-        </attribute>
-      <element>
-          <![CDATA[
-              {% if element.isSingleValue %}self.{{ element.variableName }} = decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.doubleValue
-              {% else %}{{ element.variableName }}Array.append(decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.doubleValue) //bad force unwrapping{% /if %}]]>
-        </element>
-      <value>
-        <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-        if value != nil {
-            let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            self.value = decFormatter.numberFromString(trimmed)!.doubleValue
-        }]]>
-        </value>
-    </read>
-  </simpletype>
-  <simpletype name="dateTime" objType="NSDate"
-  arrayType="[NSDate]">
-    <read>
-      <prefix>
-        <![CDATA[
-            let sRFC3339DateFormatterSubSeconds = NSDateFormatter()
-            sRFC3339DateFormatterSubSeconds.locale = self.locale
-            sRFC3339DateFormatterSubSeconds.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"
-            sRFC3339DateFormatterSubSeconds.timeZone = NSTimeZone(forSecondsFromGMT: 0)
-            
-            let sRFC3339DateFormatter = NSDateFormatter()
-            sRFC3339DateFormatter.locale = self.locale
-            sRFC3339DateFormatter.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ssXXXXX"
-            sRFC3339DateFormatterSubSeconds.timeZone = NSTimeZone(forSecondsFromGMT: 0)]]></prefix>
-      <attribute>
-        <![CDATA[
-        self.{{ attribute.variableName }} = sRFC3339DateFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))! )
-            if(self.{{ attribute.variableName }} == nil) {
-            self.{{ attribute.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)
-            }]]>
-        </attribute>
-      <element>
-          <![CDATA[
-              {% if element.isSingleValue %}self.{{ element.variableName }} = sRFC3339DateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-              if(self.{{ element.variableName }} == nil) {
-                  self.{{ element.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-              }
-              {% else %}var {{ element.variableName }}Temp = sRFC3339DateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-              if({{element.variableName }}Temp == nil) {
-                  {{ element.variableName }}Temp = sRFC3339DateFormatterSubSeconds.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-              }
-              {{ element.variableName }}Array.append(!) //bad force unwrapping{% /if %}]]>
-        </element>
-      <value>
-        <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-        if value != nil {
-            let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            self.value = sRFC3339DateFormatter.dateFromString(trimmed)
-            if(!self.value) {
-                self.value = sRFC3339DateFormatterSubSeconds.dateFromString(trimmed)
-            }
-        }]]>
-        </value>
-    </read>
-  </simpletype>
-  <simpletype name="date" objType="NSDate"
-      arrayType="[NSDate]">
-      <read>
-          <prefix>
-              <![CDATA[let dateOnlyFormatter = NSDateFormatter()
-                  dateOnlyFormatter.dateFormat = "yyyy-MM-dd"
-                  dateOnlyFormatter.timeZone = NSTimeZone(name:"UTC")
-                  dateOnlyFormatter.locale = self.locale
-              ]]>
-          </prefix>
-          <attribute>
-              <![CDATA[
-                  self.{{ attribute.variableName }} = dateOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
-          </attribute>
-          <element>
-              <![CDATA[
-                  {% if element.isSingleValue %}self.{{ element.variableName }} = dateOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-                  {% else %}{{ element.variableName }}Array.append(dateOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad force unwrapping{% /if %}]]>
-          </element>
-          <value>
-              <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-                  if value != nil {
-                  let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-                  self.value = dateOnlyFormatter.dateFromString(trimmed)
-                  }]]>
-          </value>
-      </read>
-  </simpletype>
-  <simpletype name="time" objType="NSDate"
-      arrayType="[NSDate]">
-      <read>
-          <prefix>
-              <![CDATA[let timeOnlyFormatter = NSDateFormatter()
-                  timeOnlyFormatter.dateFormat = "HH:mm:ss"
-                  timeOnlyFormatter.timeZone = NSTimeZone(name:"UTC")
-                  timeOnlyFormatter.locale = self.locale
-              ]]>
-          </prefix>
-          <attribute>
-              <![CDATA[
-                  self.{{ attribute.variableName }} = timeOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
-          </attribute>
-          <element>
-              <![CDATA[
-                  {% if element.isSingleValue %}self.{{ element.variableName }} = timeOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-                  {% else %}{{ element.variableName }}Array.append(timeOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad force unwrapping{% /if %}]]>
-          </element>
-          <value>
-              <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-                  if value != nil {
-                  let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-                  self.value = timeOnlyFormatter.dateFromString(trimmed)
-                  }]]>
-          </value>
-      </read>
-  </simpletype>
-  <!--complex type-->
-  <complextype objType="@objc-Subclass"
-  arrayType="[{{ type.targetClassName }}]">
-    <read>
-      <element>
-        <![CDATA[
-        {% if element.isSingleValue %}self.{{ element.variableName }} = {{ element.codeType }}(reader: reader){% else %}{{ element.variableName }}Array.append({{ element.schemaType.targetClassName }}(reader: reader)){% /if %}]]>
-        </element>
-    </read>
-    <implementation>
-      <header extension=""></header>
-      <class extension="swift">
-        <![CDATA[
-        import Foundation
-
-        @objc
-        class {{ type.targetClassName }} {% if type.hasComplexBaseClass %}: {{ type.baseClass.targetClassName }} {%else %}: NSObject{% /if %}{
-            {% if type.hasComplexBaseClass %}
-            {% else %}
-            /** Property that sets the NSLocale used by formatters of this type. It defaults to enUSPOSIX */
-            var locale = NSLocale(localeIdentifier: "en_US_POSIX")
-            {% /if %}
-            {% for attribute in type.attributes %}
-            var {{ attribute.variableName }}: {% if attribute.hasEnumeration %}{{ attribute.schemaType.enumerationName }}{% else %}{{ attribute.codeType }}{% /if %}?
-            {% /for %}
-            {% for element in type.elements %}
-            var {{ element.variableName }}: {% if element.hasEnumeration %}{{ element.schemaType.enumerationName }}{% else %}{{ element.codeType }}{% /if %}?
-            {% /for %}
-            {% if type.hasSimpleBaseClass %}/**
-            the type's underlying value
-            */
-            var value: {% if type.baseClass.hasEnumeration %}{{ type.baseClass.enumerationName }}{% else %}{{ type.baseClass.targetClassName }}{% /if %}?{% /if %}
-            
-            {% if type.hasComplexBaseClass %}override {% /if %}func readAttributes(reader: xmlTextReaderPtr) {{% if type.hasComplexBaseClass %}
-            super.readAttributes(reader)
-            {% /if %}{{ type.combinedReadPrefixCode }}
-            
-            {% for attribute in type.attributes %}
-            let {{ attribute.name }}AttrName = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ attribute.name }}").UTF8String)
-            let {{ attribute.name }}AttrValue = xmlTextReaderGetAttribute(reader, {{ attribute.name }}AttrName)
-            if({{ attribute.name }}AttrValue != nil) {
-                {{ attribute.readCodeForAttribute }}
-                xmlFree({{ attribute.name }}AttrValue)
-                }{% /for %}
-            }
-            
-            {% if type.hasComplexBaseClass %}override {% /if %}init(reader: xmlTextReaderPtr) {
-                let _complexTypeXmlDept = xmlTextReaderDepth(reader)
-                {% if type.hasComplexBaseClass %}super.init(reader: reader){% else %}super.init(){% /if %}
-                {{ type.combinedReadPrefixCode }}{% if type.hasComplexBaseClass %}{% else %}
-                self.readAttributes(reader){% /if %}
-                {% for element in type.elements %}
-                {% if element.isSingleValue %}{% else %}var {{ element.variableName }}Array = {{ element.codeType }}(){% /if %}{% /for %}
-                
-                {% if type.hasComplexBaseClass %}var _readerOk:Int32=1{% else %}var _readerOk = xmlTextReaderRead(reader){% /if %}
-                var _currentNodeType = xmlTextReaderNodeType(reader)
-                var _currentXmlDept = xmlTextReaderDepth(reader)
-                
-                while(_readerOk > 0 && _currentNodeType != 0/*XML_READER_TYPE_NONE*/ && _complexTypeXmlDept < _currentXmlDept) {
-                {% if type.hasComplexChildren %}var handledInChild = false{% /if %}
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
+    <format_style type="builtin"/>
+    <additional_file path="libxml-bridging-header.header"
+    target_path="libxml-bridging-header.h" />
+    <!-- known simpletypes-->
+    <simpletype name="string" objType="String" arrayType="[String]">
+        <read>
+            <prefix></prefix>
+            <attribute>
+                <![CDATA[
+                    {% if attribute.hasEnumeration %}self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))){% else %}self.{{ attribute.variableName }} = String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)){% /if %}]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))
+                    {% else %}{{ element.variableName }}Array.append(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))){% /if %}]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    self.value = value]]>
+            </value>
+        </read>
+        <write>
+            <prefix/>
+            <attribute>
+                <![CDATA[let {{ attribute.variableName }}AttrValue = self.{{ attribute.variableName }}]]>
+            </attribute>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, {{ element.variableName }}Value)]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = Int(xmlTextWriterWriteString(writer, value))
+                    if statusCode < 0 {
+                    return statusCode
+                    }]]>
+            </value>
+        </write>
+    </simpletype>
+    <simpletype name="anyURI" objType="NSURL" arrayType="[NSURL]">
+        <read>
+            <prefix></prefix>
+            <attribute>
+                <![CDATA[
+                    self.{{ attribute.variableName }} = NSURL(string: String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = NSURL(string: String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    {% else %}{{ element.variableName }}Array.append(NSURL(string: String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad unwrapping{% /if %}]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    self.value = NSURL(string: value)]]>
+            </value>
+        </read>
+        <write>
+            <prefix/>
+            <attribute>
+                <![CDATA[let {{ attribute.variableName }}AttrValue: String? = String({{ attribute.variableName }})]]>
+            </attribute>
+            <element>
+                <![CDATA[let value = UnsafePointer<xmlChar>(NSString(string: {{ element.variableName }}Value.absoluteString).UTF8String)
+                    xmlTextWriterWriteString(writer, value)]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, value)
+                    if (statusCode < 0) {
+                    return statusCode
+                    }]]>
+            </value>
+        </write>
+    </simpletype>
+    <simpletype name="boolean" objType="Bool" arrayType="[Bool]">
+        <read>
+            <prefix></prefix>
+            <attribute>
+                <![CDATA[
+                    self.{{ attribute.variableName }} = (String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)) == "true")]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue)) == "true"
+                    {% else %}{{ element.variableName }}Array.append(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue)) == "true"){% /if %}]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    self.value = (value == "true")]]>
+            </value>
+        </read>
+        <write>
+            <prefix/>
+            <attribute>
+                <![CDATA[let {{ attribute.variableName }}AttrValue: String? = self.{{ attribute.variableName }}! ? "true" : "false"]]>
+            </attribute>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, ({{ element.variableName }}Value ? "true" : "false"))]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, ({{ element.variableName }}Value ? "true" : "false"]]);
+                    if (statusCode < 0) {
+                    return statusCode
+                    }]]>
+            </value>
+        </write>
+    </simpletype>
+    <simpletype name="integer" objType="Int" arrayType="[Int]">
+        <read>
+            <prefix>
+                <![CDATA[
+                    let numFormatter = NSNumberFormatter()
+                    numFormatter.numberStyle = .DecimalStyle
+                    numFormatter.locale = self.locale
+                ]]>
+            </prefix>
+            <attribute>
+                <![CDATA[
+                    self.{{ attribute.variableName }} = numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)!.integerValue]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.integerValue
+                    {% else %}{{ element.variableName }}Array.append(numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.integerValue)  //bad force unwrapping{% /if %}]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    if value != nil {
+                    let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                    self.value = numFormatter.numberFromString(trimmed).integerValue
+                    }]]>
+            </value>
+        </read>
+        <write>
+            <prefix>
+                let numFormatter = NSNumberFormatter()
+                numFormatter.numberStyle = .DecimalStyle
+            </prefix>
+            <attribute>
+                <![CDATA[let {{ attribute.variableName }}AttrValue = numFormatter.stringFromNumber(self.{{ attribute.variableName }}!)]]>
+            </attribute>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, numFormatter.stringFromNumber({{ element.variableName }}Value))]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, numFormatter.stringFromNumber:self.value))
+                    if (statusCode < 0) {
+                    return statusCode
+                    }]]>
+            </value>
+        </write>
+    </simpletype>
+    <simpletype name="decimal" objType="Double" arrayType="[Double]">
+        <read>
+            <prefix>
+                <![CDATA[
+                    let decFormatter = NSNumberFormatter()
+                    decFormatter.numberStyle = .DecimalStyle
+                    decFormatter.locale = self.locale]]>
+            </prefix>
+            <attribute>
+                <![CDATA[
+                    self.{{ attribute.variableName }} = decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)!.doubleValue]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.doubleValue
+                    {% else %}{{ element.variableName }}Array.append(decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.doubleValue) //bad force unwrapping{% /if %}]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    if value != nil {
+                    let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                    self.value = decFormatter.numberFromString(trimmed)!.doubleValue
+                    }]]>
+            </value>
+        </read>
+        <write>
+            <prefix>
+                <![CDATA[let integerFormatter = NSNumberFormatter()
+                    integerFormatter.numberStyle = .DecimalStyle]]>
+            </prefix>
+            <attribute>
+                <![CDATA[let {{ attribute.variableName }}AttrValue = integerFormatter.stringFromNumber(self.{{ attribute.variableName }}!)]]>
+            </attribute>
+            <element>
+                <![CDATA[xmlTextWriterWriteString(writer, integerFormatter.stringFromNumber({{ element.variableName }}Value))]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, integerFormatter.stringFromNumber(self.value))
+                    if (statusCode < 0) {
+                    return statusCode
+                    }]]>
+            </value>
+        </write>
+    </simpletype>
+    <simpletype name="dateTime" objType="NSDate"
+        arrayType="[NSDate]">
+        <read>
+            <prefix>
+                <![CDATA[
+                    let sRFC3339DateFormatterSubSeconds = NSDateFormatter()
+                    sRFC3339DateFormatterSubSeconds.locale = self.locale
+                    sRFC3339DateFormatterSubSeconds.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"
+                    sRFC3339DateFormatterSubSeconds.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+                    
+                    let sRFC3339DateFormatter = NSDateFormatter()
+                    sRFC3339DateFormatter.locale = self.locale
+                    sRFC3339DateFormatter.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ssXXXXX"
+                    sRFC3339DateFormatterSubSeconds.timeZone = NSTimeZone(forSecondsFromGMT: 0)]]></prefix>
+            <attribute>
+                <![CDATA[
+                    self.{{ attribute.variableName }} = sRFC3339DateFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))! )
+                    if(self.{{ attribute.variableName }} == nil) {
+                    self.{{ attribute.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)
+                    }]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = sRFC3339DateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    if(self.{{ element.variableName }} == nil) {
+                    self.{{ element.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    }
+                    {% else %}var {{ element.variableName }}Temp = sRFC3339DateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    if({{element.variableName }}Temp == nil) {
+                    {{ element.variableName }}Temp = sRFC3339DateFormatterSubSeconds.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    }
+                    {{ element.variableName }}Array.append(!) //bad force unwrapping{% /if %}]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    if value != nil {
+                    let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                    self.value = sRFC3339DateFormatter.dateFromString(trimmed)
+                    if(!self.value) {
+                    self.value = sRFC3339DateFormatterSubSeconds.dateFromString(trimmed)
+                    }
+                    }]]>
+            </value>
+        </read>
+        <write>
+            <prefix>
+                <![CDATA[
+                    let sRFC3339DateFormatter = NSDateFormatter()
+                    sRFC3339DateFormatter.locale = self.locale
+                    sRFC3339DateFormatter.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ssXXXXX"
+                    sRFC3339DateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)]]>
+            </prefix>
+            <attribute>
+                <![CDATA[
+                    if self.{{ attribute.variableName }} {
+                    {{ attribute.variableName }}AttrValue = sRFC3339DateFormatter.stringFromDate(self.{{ attribute.variableName }})
+                    }]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    if {{ element.variableName }}Value {
+                    xmlTextWriterWriteString(writer, sRFC3339DateFormatter.stringFromDate({{ element.variableName }}Value))
+                    }]]>
+            </element>
+            <value>
+                <![CDATA[
+                    if let value = self.value {
+                    statusCode = xmlTextWriterWriteString(writer, sRFC3339DateFormatter.stringFromDate(value))
+                    if statusCode < 0 {
+                    return statusCode
+                    }
+                    }]]>
+            </value>
+        </write>
+    </simpletype>
+    <simpletype name="date" objType="NSDate"
+        arrayType="[NSDate]">
+        <read>
+            <prefix>
+                <![CDATA[let dateOnlyFormatter = NSDateFormatter()
+                    dateOnlyFormatter.dateFormat = "yyyy-MM-dd"
+                    dateOnlyFormatter.timeZone = NSTimeZone(name:"UTC")
+                    dateOnlyFormatter.locale = self.locale
+                ]]>
+            </prefix>
+            <attribute>
+                <![CDATA[
+                    self.{{ attribute.variableName }} = dateOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = dateOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    {% else %}{{ element.variableName }}Array.append(dateOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad force unwrapping{% /if %}]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    if value != nil {
+                    let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                    self.value = dateOnlyFormatter.dateFromString(trimmed)
+                    }]]>
+            </value>
+        </read>
+        <write>
+            <prefix>
+                NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter alloc] init];
+                dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
+                dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+                dateOnlyFormatter.locale = self.locale;
+            </prefix>
+            <attribute>
+                <![CDATA[
+                    if let {{ attribute.variableName }} = self.{{ attribute.variableName }} {
+                    {{ attribute.variableName }}AttrValue = dateOnlyFormatter.stringFromDate:{{ attribute.variableName }}
+                    }]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    if {{ element.variableName }}Value != nil {
+                    xmlTextWriterWriteString(writer, dateOnlyFormatter.stringFromDate:{{ element.variableName }}Value)
+                    }]]>
+            </element>
+            <value>
+                <![CDATA[
+                    if let value = self.value {
+                    statusCode = xmlTextWriterWriteString(writer, dateOnlyFormatter.stringFromDate:value)
+                    if (statusCode < 0) {
+                    return statusCode
+                    }
+                    }
+                ]]>
+            </value>
+        </write>
+    </simpletype>
+    <simpletype name="time" objType="NSDate"
+        arrayType="[NSDate]">
+        <read>
+            <prefix>
+                <![CDATA[let timeOnlyFormatter = NSDateFormatter()
+                    timeOnlyFormatter.dateFormat = "HH:mm:ss"
+                    timeOnlyFormatter.timeZone = NSTimeZone(name:"UTC")
+                    timeOnlyFormatter.locale = self.locale
+                ]]>
+            </prefix>
+            <attribute>
+                <![CDATA[
+                    self.{{ attribute.variableName }} = timeOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = timeOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    {% else %}{{ element.variableName }}Array.append(timeOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad force unwrapping{% /if %}]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    if value != nil {
+                    let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                    self.value = timeOnlyFormatter.dateFromString(trimmed)
+                    }]]>
+            </value>
+        </read>
+        <write>
+            <prefix>
+                let timeFormatter = NSDateFormatter()
+                timeFormatter.dateFormat = "HH:mm:ss"
+                timeFormatter.timeZone = NSTimeZone(abbreviation:"UTC")
+            </prefix>
+            <attribute>
+                <![CDATA[
+                    if let {{ attribute.variableName }} = self.{{ attribute.variableName }} {
+                    {{ attribute.variableName }}AttrValue = timeFormatter.stringFromDate({{ attribute.variableName }})
+                    }
+                ]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    if {{ element.variableName }}Value != nil {
+                    xmlTextWriterWriteString(writer, timeFormatter.stringFromDate({{ element.variableName }}Value))
+                    }
+                ]]>
+            </element>
+            <value>
+                <![CDATA[
+                    if let value = self.value {
+                    statusCode = xmlTextWriterWriteString(writer, timeFormatter.stringFromDate(value))
+                    if (statusCode < 0) {
+                    return statusCode
+                    }
+                    }
+                ]]>
+            </value>
+        </write>
+    </simpletype>
+    <!--complex type-->
+    <complextype objType="@objc-Subclass"
+        arrayType="[{{ type.targetClassName }}]">
+        <read>
+            <element>
+                <![CDATA[
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = {{ element.codeType }}(reader: reader){% else %}{{ element.variableName }}Array.append({{ element.schemaType.targetClassName }}(reader: reader)){% /if %}]]>
+            </element>
+        </read>
+        <write>
+            <element>
+                <![CDATA[let statusCode : Int = {{ element.variableName }}Value.writeWithWriter(writer)
+                    if statusCode < 0 {
+                    return statusCode
+                    }]]>
+            </element>
+        </write>
+        <implementation>
+            <header extension=""></header>
+            <class extension="swift">
+                <![CDATA[
+                    import Foundation
+                    
+                    @objc
+                    class {{ type.targetClassName }} {% if type.hasComplexBaseClass %}: {{ type.baseClass.targetClassName }} {% else %}: NSObject{% /if %}{
+                    {% if type.hasComplexBaseClass %}
+                    {% else %}
+                    /** Property that sets the NSLocale used by formatters of this type. It defaults to enUSPOSIX */
+                    var locale = NSLocale(localeIdentifier: "en_US_POSIX")
+                    {% /if %}
+                    {% for attribute in type.attributes %}
+                    var {{ attribute.variableName }}: {% if attribute.hasEnumeration %}{{ attribute.schemaType.enumerationName }}{% else %}{{ attribute.codeType }}{% /if %}?
+                    {% /for %}
+                    {% for element in type.elements %}
+                    var {{ element.variableName }}: {% if element.hasEnumeration %}{{ element.schemaType.enumerationName }}{% else %}{{ element.codeType }}{% /if %}?
+                    {% /for %}
+                    {% if type.hasSimpleBaseClass %}/**
+                    the type's underlying value
+                    */
+                    var value: {% if type.baseClass.hasEnumeration %}{{ type.baseClass.enumerationName }}{% else %}{{ type.baseClass.targetClassName }}{% /if %}?{% /if %}
+                    
+                    {% if type.hasComplexBaseClass %}override {% /if %}func readAttributes(reader: xmlTextReaderPtr) {{% if type.hasComplexBaseClass %}
+                    super.readAttributes(reader)
+                    {% /if %}{{ type.combinedReadPrefixCode }}
+                    
+                    {% for attribute in type.attributes %}
+                    let {{ attribute.name }}AttrName = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ attribute.name }}").UTF8String)
+                    let {{ attribute.name }}AttrValue = xmlTextReaderGetAttribute(reader, {{ attribute.name }}AttrName)
+                    if({{ attribute.name }}AttrValue != nil) {
+                    {{ attribute.readCodeForAttribute }}
+                    xmlFree({{ attribute.name }}AttrValue)
+                    }{% /for %}
+                    }
+                    
+                    {% if type.hasComplexBaseClass %}override {% /if %}init(reader: xmlTextReaderPtr) {
+                    let _complexTypeXmlDept = xmlTextReaderDepth(reader)
+                    {% if type.hasComplexBaseClass %}super.init(reader: reader){% else %}super.init(){% /if %}
+                    {{ type.combinedReadPrefixCode }}{% if type.hasComplexBaseClass %}{% else %}
+                    self.readAttributes(reader){% /if %}
+                    {% for element in type.elements %}
+                    {% if element.isSingleValue %}{% else %}var {{ element.variableName }}Array = {{ element.codeType }}(){% /if %}{% /for %}
+                    
+                    {% if type.hasComplexBaseClass %}var _readerOk:Int32=1{% else %}var _readerOk = xmlTextReaderRead(reader){% /if %}
+                    var _currentNodeType = xmlTextReaderNodeType(reader)
+                    var _currentXmlDept = xmlTextReaderDepth(reader)
+                    
+                    while(_readerOk > 0 && _currentNodeType != 0/*XML_READER_TYPE_NONE*/ && _complexTypeXmlDept < _currentXmlDept) {
+                    {% if type.hasComplexChildren %}var handledInChild = false{% /if %}
                     if(_currentNodeType == 1/*XML_READER_TYPE_ELEMENT*/ || _currentNodeType == 3/*XML_READER_TYPE_TEXT*/) {
-                        let _currentElementNameXmlChar = xmlTextReaderConstLocalName(reader)
-                        let _currentElementName = String.fromCString(UnsafePointer<CChar>(_currentElementNameXmlChar))
-                        {% for element in type.elements %}if("{{element.name}}" == _currentElementName) {
-                            
-                            {% if element.hasComplexType %}
-                            {{ element.readCodeForContent }}
-                            handledInChild = true
-                            {% else %}
-                            _readerOk = xmlTextReaderRead(reader)
-                            _currentNodeType = xmlTextReaderNodeType(reader)
-                            let {{element.name}}ElementValue = xmlTextReaderConstValue(reader)
-                            if {{element.name}}ElementValue != nil {
-                                {{ element.readCodeForContent }}
-                            }
-                            _readerOk = xmlTextReaderRead(reader)
-                            _currentNodeType = xmlTextReaderNodeType(reader)
-                            {% /if %}
-                            
-                        } else {% /for %} {% if type.hasSimpleBaseClass %} if("#text" == _currentElementName){
-                            let contentValue = xmlTextReaderConstValue(reader)
-                            if(contentValue != nil) {
-                                {{ type.readSimpleContent }}
-                            }
-                        } else {% /if %} if(true) {
-                            print("Ignoring unexpected: \(_currentElementName)")
-                            break
-                        }
+                    let _currentElementNameXmlChar = xmlTextReaderConstLocalName(reader)
+                    let _currentElementName = String.fromCString(UnsafePointer<CChar>(_currentElementNameXmlChar))
+                    {% for element in type.elements %}if("{{element.name}}" == _currentElementName) {
+                    
+                    {% if element.hasComplexType %}
+                    {{ element.readCodeForContent }}
+                    handledInChild = true
+                    {% else %}
+                    _readerOk = xmlTextReaderRead(reader)
+                    _currentNodeType = xmlTextReaderNodeType(reader)
+                    let {{element.name}}ElementValue = xmlTextReaderConstValue(reader)
+                    if {{element.name}}ElementValue != nil {
+                    {{ element.readCodeForContent }}
+                    }
+                    _readerOk = xmlTextReaderRead(reader)
+                    _currentNodeType = xmlTextReaderNodeType(reader)
+                    {% /if %}
+                    
+                    } else {% /for %} {% if type.hasSimpleBaseClass %} if("#text" == _currentElementName){
+                    let contentValue = xmlTextReaderConstValue(reader)
+                    if(contentValue != nil) {
+                    {{ type.readSimpleContent }}
+                    }
+                    } else {% /if %} if(true) {
+                    print("Ignoring unexpected: \(_currentElementName)")
+                    break
+                    }
                     }
                     {% if type.hasComplexChildren %}_readerOk = handledInChild ? xmlTextReaderReadState(reader) : xmlTextReaderRead(reader){% else %}_readerOk = xmlTextReaderRead(reader){% /if %}
                     _currentNodeType = xmlTextReaderNodeType(reader)
                     _currentXmlDept = xmlTextReaderDepth(reader)
-                }
-                {% for element in type.elements %}
-                {% if element.isSingleValue %}{% else %}if({{ element.variableName }}Array.count > 0) { self.{{ element.variableName }} = {{ element.variableName }}Array }{% /if %}{% /for %}
-            }
-            
-            {% if type.hasComplexBaseClass %}override {% /if %}var dictionary: [String: AnyObject] {
-                var dict = [String: AnyObject]()
-                {% if type.hasComplexBaseClass %}for (name, value) in super.dictionary {
+                    }
+                    {% for element in type.elements %}
+                    {% if element.isSingleValue %}{% else %}if({{ element.variableName }}Array.count > 0) { self.{{ element.variableName }} = {{ element.variableName }}Array }{% /if %}{% /for %}
+                    }
+                    
+                    {% if type.hasComplexBaseClass %}override {% /if %}var dictionary: [String: AnyObject] {
+                    var dict = [String: AnyObject]()
+                    {% if type.hasComplexBaseClass %}for (name, value) in super.dictionary {
                     dict[name] = value
                     }{% /if %}
                     
                     {% for attribute in type.attributes %}
                     if(self.{{ attribute.variableName }} != nil) {
-                        {% if attribute.hasEnumeration %}
-                        let obj = {{ attribute.schemaType.enumerationName }}.toString(self.{{ attribute.variableName }}!)
-                        dict["{{ attribute.variableName }}"] = obj
-                        {% else %}
-                        dict["{{ attribute.variableName }}"] = self.{{ attribute.variableName }}!
-                        {% /if %}
+                    {% if attribute.hasEnumeration %}
+                    let obj = {{ attribute.schemaType.enumerationName }}.toString(self.{{ attribute.variableName }}!)
+                    dict["{{ attribute.variableName }}"] = obj
+                    {% else %}
+                    dict["{{ attribute.variableName }}"] = self.{{ attribute.variableName }}!
+                    {% /if %}
                     }
                     {% /for %}
                     {% for element in type.elements %}
                     {% if element.hasComplexType %}
                     if(self.{{ element.variableName }} != nil) {
-                        dict["{{ element.variableName }}"] = self.{{ element.variableName }}!{% if element.isSingleValue %}{% else %}.map({$0.dictionary}){% /if %}
+                    dict["{{ element.variableName }}"] = self.{{ element.variableName }}!{% if element.isSingleValue %}{% else %}.map({$0.dictionary}){% /if %}
                     }
                     {% else %}
                     if(self.{{ element.variableName }} != nil) {
-                        {% if element.hasEnumeration %}
-                        let obj = {{ element.schemaType.enumerationName }}.toString({{ element.variableName }}!)
-                        dict["value"] = obj
-                        {% else %}
-                        dict["{{ element.variableName }}"] = self.{{ element.variableName }}!
-                        {% /if %}
+                    {% if element.hasEnumeration %}
+                    let obj = {{ element.schemaType.enumerationName }}.toString({{ element.variableName }}!)
+                    dict["value"] = obj
+                    {% else %}
+                    dict["{{ element.variableName }}"] = self.{{ element.variableName }}!
+                    {% /if %}
                     }
                     {% /if %}
                     {% /for %}{% if type.hasSimpleBaseClass %}
                     if(self.value != nil) {
-                        {% if type.baseClass.hasEnumeration %}
-                        let obj = {{ type.baseClass.enumerationName }}.toString(self.value!)
-                        dict["value"] = obj
-                        {% else %}
-                        dict["value"] = self.value!
-                        {% /if %}
+                    {% if type.baseClass.hasEnumeration %}
+                    let obj = {{ type.baseClass.enumerationName }}.toString(self.value!)
+                    dict["value"] = obj
+                    {% else %}
+                    dict["value"] = self.value!
+                    {% /if %}
                     }
                     {% /if %}
                     
                     return dict
-                }
-                
-            }
-            ]]>
-        </class>
-    </implementation>
-    <reader>
-      <header extension=""></header>
-      <class extension="swift">
-        <![CDATA[
-            import Foundation
-            
-            let kGlobalElementNamesArray = ["##elements##"{% for element in type.globalElements %},"{{ element.name }}"{% /for %}]
-
-            extension {{ type.targetClassFileName }} {
-                class func {{ type.name }}FromURL(url:NSURL) -> {{ type.targetClassName }}? {
+                    }
+                    
+                    {% if type.hasComplexBaseClass %}override {% /if %}func writeAttributes(writer:COpaquePointer) -> Int {
+                    {% if type.hasComplexBaseClass %}
+                    super.writeAttributes(writer)
+                    {% /if %}
+                    
+                    {% for simpleType in type.simpleTypesInUse %}
+                    {{ simpleType.writePrefixCode }}
+                    {% /for %}
+                    
+                    {% for attribute in type.attributes %}
+                    {{ attribute.writeCodeForAttribute }}
+                    if {% if attribute.hasDefault %}strcmp({{ attribute.variableName }}AttrValue!, "{{ attribute.defaultValue }}") != 0{% else %}!({{ attribute.variableName }}AttrValue ?? "").isEmpty{% /if %} {
+                    let statusCode = Int(xmlTextWriterWriteAttribute(writer, "{{ attribute.name }}", {{ attribute.variableName }}AttrValue!))
+                    if statusCode < 0 {
+                    return statusCode
+                    }
+                    }
+                    {% /for %}
+                    return 0
+                    }
+                    
+                    {% if type.hasComplexBaseClass %}override {% /if %}func writeElements(writer:xmlTextWriterPtr) -> Int {
+                    {% if type.hasComplexBaseClass %}
+                    super.writeElements(writer)
+                    {% /if %}
+                    
+                    {% for simpleType in type.simpleTypesInUse %}
+                    {{ simpleType.writePrefixCode }}
+                    {% /for %}
+                    
+                    {% for element in type.elements %}
+                    {% if element.isSingleValue %}
+                    {% if element.hasEnumeration %}
+                    {{ element.writeCodeForContent }}
+                    {% else %}
+                    if let {{ element.variableName }}Value = self.{{ element.variableName }} {
+                    xmlTextWriterStartElement(writer, "{{ element.name }}")
+                    {{ element.writeCodeForContent }}
+                    xmlTextWriterEndElement(writer)
+                    }
+                    {% /if %}
+                    {% else %}
+                    if let binding{{ element.variableName }} = self.{{ element.variableName }} {
+                    for {{ element.variableName }}Value in binding{{ element.variableName }} {
+                    xmlTextWriterStartElement(writer, "{{ element.name }}")
+                    
+                    {{ element.writeCodeForContent }}
+                    
+                    xmlTextWriterEndElement(writer)
+                    }
+                    }
+                    {% /if %}
+                    {% /for %}
+                    
+                    return 0
+                    }
+                    
+                    {% if type.hasComplexBaseClass %}override {% /if %}func writeWithWriter(writer:COpaquePointer) -> Int {
+                    var statusCode = 0
+                    
+                    statusCode = self.writeAttributes(writer)
+                    if statusCode < 0 {
+                    return statusCode
+                    }
+                    
+                    statusCode = self.writeElements(writer)
+                    if statusCode < 0 {
+                    return statusCode
+                    }
+                    
+                    {% if type.hasSimpleBaseClass %}
+                    if let value = self.value {
+                    {{ type.writeSimpleContent }}
+                    }{% /if %}
+                    
+                    return statusCode
+                    }
+                    }
+                ]]>
+            </class>
+        </implementation>
+        <reader>
+            <header extension=""></header>
+            <class extension="swift">
+                <![CDATA[
+                    import Foundation
+                    
+                    let kGlobalElementNamesArray = ["##elements##"{% for element in type.globalElements %},"{{ element.name }}"{% /for %}]
+                    
+                    extension {{ type.targetClassFileName }} {
+                    
+                    /**
+                    * Name:            {{ type.name }}FromURL
+                    * Parameters:      NSURL - the location of the XML file as a NSURL representation
+                    * Returns:         A generated {{ type.targetClassName }} object
+                    * Description:     Generate a {{ type.targetClassName }} object from the path
+                    *                  specified by the user
+                    */
+                    class func {{ type.name }}FromURL(url:NSURL) -> {{ type.targetClassName }}? {
                     let s = (url.absoluteString as NSString).UTF8String
                     let reader = xmlReaderForFile( s, nil, 0/*options*/)
                     var ret: Int32
                     var obj: {{ type.targetClassName }}? = nil
                     
                     if(reader != nil) {
-                        //find the correct root
-                        repeat {
-                            ret = xmlTextReaderRead(reader)
-                            if(ret == 1/*XML_READER_TYPE_ELEMENT*/) {
-                                let elementNameXmlChar = xmlTextReaderConstLocalName(reader)
-                                let elementName = String.fromCString(UnsafePointer<CChar>(elementNameXmlChar))
-                                let array = [kGlobalElementNamesArray]
-                                let predicate = NSPredicate(format: "SELF IN %@", argumentArray: array)
-                                if(predicate.evaluateWithObject(elementName)) {
-                                    obj = {{ type.targetClassName }}(reader: reader)
-                                    break
-                                }
-                            }
-                        } while(ret != 0)
-                        xmlFreeTextReader(reader)
+                    //find the correct root
+                    repeat {
+                    ret = xmlTextReaderRead(reader)
+                    if(ret == 1/*XML_READER_TYPE_ELEMENT*/) {
+                    let elementNameXmlChar = xmlTextReaderConstLocalName(reader)
+                    let elementName = String.fromCString(UnsafePointer<CChar>(elementNameXmlChar))
+                    let array = [kGlobalElementNamesArray]
+                    let predicate = NSPredicate(format: "SELF IN %@", argumentArray: array)
+                    if(predicate.evaluateWithObject(elementName)) {
+                    obj = {{ type.targetClassName }}(reader: reader)
+                    break
+                    }
+                    }
+                    } while(ret != 0)
+                    xmlFreeTextReader(reader)
                     }
                     
                     return obj
-                }
-                
-                class func {{ type.name }}FromFile(path:String) -> {{ type.targetClassName }}? {
+                    }
+                    
+                    /**
+                    * Name:            {{ type.name }}FromFile
+                    * Parameters:      String - the location of the XML file as a string
+                    * Returns:         A generated {{ type.targetClassName }} object
+                    * Description:     Generate a {{ type.targetClassName }} object from the path
+                    *                  specified by the user
+                    */
+                    class func {{ type.name }}FromFile(path:String) -> {{ type.targetClassName }}? {
                     let url = NSURL(fileURLWithPath:path)
                     return self.{{ type.name }}FromURL(url)
-                }
-                
-                class func {{ type.name }}FromData(data:NSData) -> {{ type.targetClassName }}? {
+                    }
+                    
+                    /**
+                    * Name:            {{ type.name }}FromData
+                    * Parameters:      NSData
+                    * Returns:         A generated {{ type.targetClassName }} object
+                    * Description:     Generate the {{ type.targetClassName }} object from the NSData
+                    *                  object generated from the XML.
+                    */
+                    class func {{ type.name }}FromData(data:NSData) -> {{ type.targetClassName }}? {
                     let bytes = UnsafePointer<Int8>(data.bytes)
                     let length = Int32(data.length)
                     let reader = xmlReaderForMemory(bytes, length, nil, nil, 0/*options*/)
                     
                     if(reader != nil) {
-                        let ret = xmlTextReaderRead(reader)
-                        if(ret > 0) {
-                            return {{ type.targetClassName }}(reader: reader)
-                        }
-                        xmlFreeTextReader(reader)
+                    let ret = xmlTextReaderRead(reader)
+                    if(ret > 0) {
+                    return {{ type.targetClassName }}(reader: reader)
+                    }
+                    xmlFreeTextReader(reader)
                     }
                     
                     return nil
-                }
-            }
-            ]]>
-        </class>
-    </reader>
-  </complextype>
-  <enumeration objType="NS_ENUM" arrayType="">
-    <read>
-      <prefix></prefix>
-      <attribute>
-        <![CDATA[
-            self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)))
-            ]]>
-        </attribute>
-      <element>
-        <![CDATA[
-            self.{{ element.variableName }} = {{ element.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ element.name }}ElementValue)))
-            ]]>
-        </element>
-      <value>
-        <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
-            if value != nil {
-                let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-                self.value = {{ type.enumerationName }}.fromString(trimmed)
-            }]]>
-        </value>
-    </read>
-    <implementation>
-      <header extension=""></header>
-      <class extension="swift">
-        <![CDATA[
-            import Foundation
-            
-            enum {{ type.enumerationName }} : {{ type.swiftIntEnum }} {
-                case Unknown = -1
-                {% for enumValue in type.enumerationValues %}case {{ enumValue }}
-                {% /for %}
-                
-                private static let namesArray = ["Unknown"{% for enumValue in type.enumerationValues %},"{{ enumValue }}"{% /for %}]
-                
-                static func toString(enumType:{{ type.enumerationName }}) -> String {
+                    }
+                    
+                    /**
+                    * Name:            dataFrom{{ type.name }}
+                    * Parameters:      A generated {{ type.targetClassName }} object
+                    * Returns:         NSData from {{ type.targetClassName }} object
+                    * Description:     Create the NSData object from the {{ type.targetClassName }}
+                    *                  object.
+                    */
+                    class func dataFrom{{ type.name }}({{ type.name }}Value:{{ type.targetClassName }}) -> NSData? {
+                    let buf = xmlBufferCreate()
+                    if buf == nil {
+                    print("Error creating the xml buffer.")
+                    return nil
+                    }
+                    
+                    let writer = xmlNewTextWriterMemory(buf, 0)
+                    if writer == nil {
+                    print("Error creating the xml writer.")
+                    return nil
+                    }
+                    
+                    var rc = Int(xmlTextWriterStartDocument(writer, "1.0", "utf-8", nil))
+                    if rc < 0 {
+                    print("Error at xmlTextWriterStartDocument.")
+                    return nil
+                    }
+                    xmlTextWriterSetIndent(writer, 1)
+                    xmlTextWriterSetIndentString(writer, UnsafePointer<xmlChar>(NSString(stringLiteral: "\t").UTF8String))
+                    
+                    // Serialize object
+                    let {{ type.name }}Name = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ type.name }}").UTF8String)
+                    let {{ type.name }}URLStr = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ type.schema.targetNamespace }}").UTF8String)
+                    
+                    xmlTextWriterStartElementNS(writer, nil, {{ type.name }}Name, {{ type.name }}URLStr)
+                    let resultStatusCode = {{ type.name }}Value.writeWithWriter(writer)
+                    
+                    if resultStatusCode < 0 {
+                    xmlBufferFree(buf)
+                    return nil
+                    }
+                    
+                    xmlTextWriterEndElement(writer)
+                    
+                    rc = Int(xmlTextWriterEndDocument(writer))
+                    if rc < 0 {
+                    print("Error at xmlTextWriterEndDocument.")
+                    return nil
+                    }
+                    
+                    let xmlData = NSData(bytes: buf.memory.content, length:Int(buf.memory.use))
+                    //print(UnsafePointer<String>(buf.memory.content))
+                    
+                    xmlBufferFree(buf)
+                    
+                    return xmlData
+                    }
+
+                    }
+                ]]>
+            </class>
+        </reader>
+    </complextype>
+    <enumeration objType="NS_ENUM" arrayType="">
+        <read>
+            <prefix></prefix>
+            <attribute>
+                <![CDATA[
+                    self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)))
+                ]]>
+            </attribute>
+            <element>
+                <![CDATA[
+                    self.{{ element.variableName }} = {{ element.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ element.name }}ElementValue)))
+                ]]>
+            </element>
+            <value>
+                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                    if value != nil {
+                    let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                    self.value = {{ type.enumerationName }}.fromString(trimmed)
+                    }]]>
+            </value>
+        </read>
+        <write>
+            <prefix/>
+            <attribute>
+                <![CDATA[var {{ attribute.variableName }}AttrValue: String?
+                    if self.{{ attribute.variableName }} != .Unknown {
+                    {{ attribute.variableName }}AttrValue = {{ attribute.schemaType.enumerationName }}.toString(self.{{ attribute.variableName }}!)
+                    }]]>
+            </attribute>
+            <element>
+                <![CDATA[xmlTextWriterWriteElement(writer, "{{ element.name }}", {{ attribute.schemaType.enumerationName }}.toString(self.{{ element.variableName }}))]]>
+            </element>
+            <value>
+                <![CDATA[statusCode = Int(xmlTextWriterWriteString(writer, {{ type.baseClass.enumerationName }}.toString(self.value))
+                    if statusCode < 0 {
+                    return statusCode
+                    }]]>
+            </value>
+        </write>
+        <implementation>
+            <header extension=""></header>
+            <class extension="swift">
+                <![CDATA[
+                    import Foundation
+                    
+                    enum {{ type.enumerationName }} : {{ type.swiftIntEnum }} {
+                    case Unknown = -1
+                    {% for enumValue in type.enumerationValues %}case {{ enumValue }}
+                    {% /for %}
+                    
+                    private static let namesArray = ["Unknown"{% for enumValue in type.enumerationValues %},"{{ enumValue }}"{% /for %}]
+                    
+                    static func toString(enumType:{{ type.enumerationName }}) -> String {
                     let i = enumType.rawValue + 1
                     return namesArray[i];
-                }
-                
-                static func fromString(enumString:String?) -> {{ type.enumerationName }} {
+                    }
+                    
+                    static func fromString(enumString:String?) -> {{ type.enumerationName }} {
                     if var enumString = enumString {
-                        let locale = NSLocale(localeIdentifier: "en_US_POSIX")
-                        let numFormatter = NSNumberFormatter()
-                        numFormatter.locale = locale
-                        
-                        if(numFormatter.numberFromString(enumString) != nil) {
-                            enumString = "Value\(enumString)"
-                        }
-                        if let i = namesArray.indexOf(enumString) {
-                            if let enumType = {{ type.enumerationName }}(rawValue:i-1) {
-                                return enumType
-                            }
-                        }
+                    let locale = NSLocale(localeIdentifier: "en_US_POSIX")
+                    let numFormatter = NSNumberFormatter()
+                    numFormatter.locale = locale
+                    
+                    if(numFormatter.numberFromString(enumString) != nil) {
+                    enumString = "Value\(enumString)"
+                    }
+                    if let i = namesArray.indexOf(enumString) {
+                    if let enumType = {{ type.enumerationName }}(rawValue:i-1) {
+                    return enumType
+                    }
+                    }
                     }
                     return .Unknown
                     
-                }
-            }
-            ]]>
-        </class>
-    </implementation>
-  </enumeration>
+                    }
+                    }
+                ]]>
+            </class>
+        </implementation>
+    </enumeration>
 </template>

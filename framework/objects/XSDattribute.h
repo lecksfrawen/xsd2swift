@@ -11,7 +11,10 @@
 @property (readonly, nonatomic) NSString* form;
 
 @property (readonly, nonatomic) NSString* readCodeForAttribute;
+@property (readonly, nonatomic) NSString* writeCodeForAttribute;
 
+- (BOOL)optional;
+- (BOOL)hasDefault;
 - (NSString*) variableName; //name in generated code
 - (BOOL) hasEnumeration;
 

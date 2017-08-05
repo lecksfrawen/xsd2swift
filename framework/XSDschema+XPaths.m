@@ -61,6 +61,10 @@
     return @"read";
 }
 
+- (NSString*)XPathForTemplateWrites {
+    return @"write";
+}
+
 - (NSString*)XPathForTemplateFirstImplementationHeaders {
     return @"implementation[1]/header";
 }
@@ -87,6 +91,10 @@
 
 - (NSString*)XPathForTemplateFirstElementRead {
     return @"read[1]/element[1]";
+}
+
+- (NSString*)XPathForTemplateFirstElementWrite {
+    return @"write[1]/element[1]";
 }
 
 + (NSString*)XPathForNamechanges {

@@ -22,9 +22,11 @@
 - (NSDictionary*) substitutionDict;
 - (NSArray*) elements;
 - (NSArray*) simpleTypesInUse;
+- (NSArray*) uniqueTemplateTypes;
 - (NSArray*) complexTypesInUse;
 - (NSArray*) enumTypesInUse;
 - (NSString*) readSimpleContent;
+- (NSString*) writeSimpleContent;
 - (BOOL) hasSimpleBaseClass;
 - (BOOL) hasComplexBaseClass;
 - (BOOL) hasComplexChildren;

@@ -67,6 +67,18 @@
     return [self.schemaType readCodeForAttribute: self];
 }
 
+- (NSString*) writeCodeForAttribute {
+    return [self.schemaType writeCodeForAttribute: self];
+}
+
+- (BOOL)optional {
+    return [_use isEqual:@"optional"];
+}
+
+- (BOOL)hasDefault {
+    return _defaultValue.length > 0;
+}
+
 - (NSString*) variableName {
     return [XSDschema variableNameFromName:self.name multiple:NO];
 }

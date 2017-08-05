@@ -28,6 +28,8 @@
 
 - (NSString*)XPathForTemplateReads;
 
+- (NSString*)XPathForTemplateWrites;
+
 - (NSString*)XPathForTemplateFirstImplementationHeaders;
 
 - (NSString*)XPathForTemplateFirstImplementationClasses;
@@ -41,6 +43,8 @@
 - (NSString*)XPathForTemplateSimpleTypes;
 
 - (NSString*)XPathForTemplateFirstElementRead;
+
+- (NSString*)XPathForTemplateFirstElementWrite;
 
 + (NSString*)XPathForNamechanges;
 

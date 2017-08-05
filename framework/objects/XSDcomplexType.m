@@ -17,6 +17,7 @@
 
 @property (readonly, nonatomic) NSString* complexTypeArrayType;
 @property (readonly, nonatomic) NSString* readComplexTypeElementTemplate;
+@property (readonly, nonatomic) NSString* writeComplexTypeElementTemplate;
 
 @end
 
@@ -176,6 +177,33 @@
     return [simpleTypes allObjects];
 }
 
+- (NSArray*) uniqueTemplateTypes {
+    NSMutableSet* uniqueTemplateTypes = [NSMutableSet set];
+    
+    for (XSDattribute *anAttr in [self attributes]) {
+        XSSimpleType *type = [self.schema typeForName: anAttr.type];
+        [uniqueTemplateTypes addObject:type.typeForTemplate];
+    }
+    
+    for (XSDelement* anElement in [self elements]) {
+        id<XSType> aType = anElement.schemaType;
+        if([aType isKindOfClass: [XSSimpleType class]]) {
+            [uniqueTemplateTypes addObject:[(id)aType typeForTemplate]];
+        }
+    }
+    
+    //also add base type if needed
+    id baseType = self.baseType;
+    if(baseType != nil) {
+        id<XSType> t = [self.schema typeForName: baseType];
+        if(t != nil && [t isKindOfClass:[XSSimpleType class]]) {
+            [uniqueTemplateTypes addObject:[(id)t typeForTemplate]];
+        }
+    }
+    
+    return [uniqueTemplateTypes allObjects];
+}
+
 - (NSArray*) complexTypesInUse {
     NSMutableSet* complexTypes = [NSMutableSet set];
     id<XSType> aType;
@@ -295,6 +323,31 @@
     return str;
 }
 
+- (NSString *)writeSimpleContent {
+    id baseType = self.baseType;
+    NSMutableString *str = [NSMutableString stringWithString:@""];
+    if(baseType != nil) {
+        XSSimpleType *stype = [self.schema typeForName: baseType];
+        assert(stype);
+        if(stype != nil && [stype isKindOfClass:[XSSimpleType class]]) {
+            id substr = [stype writePrefixCode];
+            if(substr)
+                [str appendString:substr];
+            
+            if(str.length)
+                [str appendString:@"\n"];
+            
+            substr = [stype writeValueCode];
+            if(substr)
+                [str appendString:substr];
+        }
+        else
+            [str appendString:@"/*called by mistake*/"]; //:/ ?
+    }
+    
+    return str;
+}
+
 - (NSDictionary*) substitutionDict {
     return [NSDictionary dictionaryWithObject:self forKey:@"type"];
 }
@@ -306,6 +359,15 @@
 
 - (NSString*) readCodeForAttribute:(XSDattribute *)attribute {
     return @"/* cant have a complex attribute */";
+}
+
+- (NSString*) writeCodeForAttribute: (XSDattribute*) attribute {
+    return @"/* cant have a complex attribute */";
+}
+
+- (NSString*) writeCodeForElement: (XSDelement*) element {
+    NSDictionary* dict = [NSDictionary dictionaryWithObject: element forKey: @"element"];
+    return [engine processTemplate: self.schema.writeComplexTypeElementTemplate withVariables: dict];
 }
 
 - (NSString*)combinedReadPrefixCode {

@@ -183,6 +183,24 @@
     return rtn;
 }
 
+- (NSString*) writeCodeForContent {
+    NSString *rtn;
+    
+    /* Fetch the type and from those objects, call their appropriate method */
+    if(self.localType != nil) {
+        rtn = [self.localType writeCodeForElement:self];
+    }
+    else if(self.hasEnumeration){
+        XSSimpleType* simpleTypeTemp = self.schemaType;
+        rtn = [simpleTypeTemp writeCodeForElement:self];
+    } else {
+        /* Fetch the type of the current element from the schema dictionaries and read the template code and generate final code */
+        rtn = [[self.schema typeForName:self.type] writeCodeForElement:self];
+    }
+    
+    return rtn;
+}
+
 - (BOOL) isSingleValue {
     return [self.maxOccurs intValue] >= 0 && [self.maxOccurs intValue] <= 1;
 }

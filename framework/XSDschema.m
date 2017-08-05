@@ -43,6 +43,9 @@
 @property (strong, nonatomic) NSString* readerClassTemplateExtension;
 @property (strong, nonatomic) NSString* readerHeaderTemplateString;
 @property (strong, nonatomic) NSString* readerHeaderTemplateExtension;
+
+@property (strong, nonatomic) NSString* writeComplexTypeElementTemplate;
+
 @property (strong, nonatomic) NSString* classTemplateString;
 @property (strong, nonatomic) NSString* classTemplateExtension;
 @property (strong, nonatomic) NSString* headerTemplateString;
@@ -52,7 +55,7 @@
 @property (strong, nonatomic) NSString* enumHeaderTemplateString;
 @property (strong, nonatomic) NSString* enumHeaderTemplateExtension;
 
-@property (strong, nonatomic) NSXMLNode* enumReadNode;
+@property (strong, nonatomic) NSXMLNode* enumNode;
 
 @property (strong, nonatomic) NSDictionary* additionalFiles;
 @property (strong, nonatomic) NSString *targetNamespacePrefix;
@@ -368,14 +371,8 @@
         enumTypeNode = [nodes objectAtIndex: 0];
     }
     
-    //reader
-    nodes = [enumTypeNode nodesForXPath:self.XPathForTemplateReads error: &error];
-    if(error != nil) {
-        if(resultError) *resultError = error;
-        return NO;
-    }
-    if(nodes != nil && nodes.count > 0) {
-        self.enumReadNode = [nodes objectAtIndex: 0];
+    if(enumTypeNode != nil) {
+        self.enumNode = enumTypeNode;
     }
     
     /* Fetch the header file that we will use in the enumeration section */
@@ -421,10 +418,10 @@
         /* Check if we have that simpletype within our XSD provided */
         if(existingSimpleType) {
             /* For our simple type, define the values from the template */
-            [existingSimpleType supplyTemplates:aSimpleTypeNode enumTypeNode:self.enumReadNode error: &error];
+            [existingSimpleType supplyTemplates:aSimpleTypeNode enumTypeNode:self.enumNode error: &error];
         }
         else {
-            [aSimpleType supplyTemplates:aSimpleTypeNode enumTypeNode:self.enumReadNode error:&error];
+            [aSimpleType supplyTemplates:aSimpleTypeNode enumTypeNode:self.enumNode error:&error];
             [_knownSimpleTypeDict setValue: aSimpleType forKey: aSimpleType.name];
         }
     }
@@ -475,6 +472,16 @@
     }
     if(nodes != nil && nodes.count > 0) {
         self.readComplexTypeElementTemplate = [[nodes objectAtIndex: 0] stringValue];
+    }
+    
+    /* Fetch the code used to WRITE elements that have a complex type */
+    nodes = [complexTypeNode nodesForXPath:self.XPathForTemplateFirstElementWrite error: &error];
+    if(error != nil) {
+        if(resultError) *resultError = error;
+        return NO;
+    }
+    if(nodes != nil && nodes.count > 0) {
+        self.writeComplexTypeElementTemplate = [[nodes objectAtIndex: 0] stringValue];
     }
     
     //get the array type for complex types
