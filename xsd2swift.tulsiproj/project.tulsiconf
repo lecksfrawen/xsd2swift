@@ -1,0 +1,12 @@
+{
+  "configDefaults" : {
+    "optionSet" : {
+
+    }
+  },
+  "projectName" : "xsd2swift",
+  "packages" : [
+    ""
+  ],
+  "workspaceRoot" : ".."
+}

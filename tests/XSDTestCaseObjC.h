@@ -6,7 +6,7 @@
 //
 //
 
-#import "XSDTestCase.h"
+#import "tests/XSDTestCase.h"
 
 @interface XSDTestCaseObjC : XSDTestCase
 @end

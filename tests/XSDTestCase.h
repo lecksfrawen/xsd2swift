@@ -12,33 +12,33 @@
 
 @interface XSDTestCase : XCTestCase
 
-//set  all before inoking setUp
+// set  all before inoking setUp
 @property NSString *schemaName;
 @property NSString *xmlFileName;
 @property NSArray *expectedFiles;
 @property NSString *rootClassName;
 @property NSString *parseMethodName;
 
-@property (readonly) NSURL *schemaUrl;
-@property (readonly) NSURL *templateUrl;
-@property (readonly) NSURL *xmlFileUrl;
-+ (NSURL*)tmpFolderUrl;
+@property(readonly) NSURL *schemaUrl;
+@property(readonly) NSURL *templateUrl;
+@property(readonly) NSURL *xmlFileUrl;
++ (NSURL *)tmpFolderUrl;
 
-//optional
+// optional
 @property NSString *prefixOverride;
 
-- (void)assertSchema:(XSDschema*)schema;
+- (void)assertSchema:(XSDschema *)schema;
 - (void)assertParsedXML:(id)rootNode;
 
-//all help underway
+// all help underway
 + (void)helpSetUp;
 - (void)helpSetUp;
 - (void)helpTearDown;
 + (void)helpTearDown;
 
-- (void)compileParser:(NSString*)output from:(NSArray*)input;
-- (NSString*)compiledParserPath;
-- (void*)loadedLibHandle;
+- (void)compileParser:(NSString *)output from:(NSArray *)input;
+- (NSString *)compiledParserPath;
+- (void *)loadedLibHandle;
 
 #pragma mark correctness tests
 

@@ -1,0 +1,4 @@
+[submodule "third_party/MGTemplateEngine"]
+	path = third_party/MGTemplateEngine
+	url = https://github.com/StevenEWright/MGTemplateEngine.git
+	fetchrecursesubmodules = true

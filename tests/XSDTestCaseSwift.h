@@ -6,7 +6,7 @@
 //
 //
 
-#import "XSDTestCase.h"
+#import "tests/XSDTestCase.h"
 
 @interface XSDTestCaseSwift : XSDTestCase
 - (NSNumber*)reflect:(id)obj numberForKey:(NSString*)propertyName;

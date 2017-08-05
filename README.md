@@ -1,26 +1,83 @@
-XSDConverter
-=========
+# xsd2swift
 
-Parses XSD files and generates Swift (or Objective-C) classes for IOS (or OSX) -- uses libxml only
+> Command line tool to convert XML schemas to Swift classes.
 
-For every Complex Type in your schema file, a corresponding Swift (or Objective-C) class is generated with its attributes and elements as Swift (or Objective-C) properties and an init method taking an libxml2 TextReader is generated.
+This tool creates Swift classes from XSD files. The generated Swift classes it produces can be used to deserialize XML on iOS and macOS.
 
-The code is generated according to a template that you can easily customize if you need to generate specific/exotic code. For most folks the standard template included should work just fine.
+## Instructions
 
-The generator is a framework that is completely seperate from the GUI. And thus it can be embedded in any cocoa app.
+### Get the Code
 
-**The generator is checked with unit tests that read specific xsds, generate code for it, compile it using clang and then see if they can parse an according xml**<br/>
-(so IF you find bugs / missing features - please provide a xsd & a xml file so I can fix it / add it to the generator)
+```
+git clone https://github.com/StevenEWright/xsd2swift.git && cd xsd2swift
+```
 
-### What works already:
-##### (the key points I remember, a changelog is attached)
+### Build the Command Line tool
+
+Building `xsd2swift` requires [Bazel](http://bazel.build).
+
+From the root of the repository, run:
+
+```
+tools/build.sh
+```
+
+The built command-line tools will be placed in:
+
+```
+out/xsd2swift
+```
+
+### Use
+
+Produce Swift classes for the complex types represented in an XML schema document by invoking `xsd2swift` from the command line and redirecting the output to a file.
+
+```
+xsd2swift -schema [path] (-prefix [prefix])
+```
+
+|Option|Description|
+|--|--|
+|`-schema [path]`|The location of the XML schema.|
+|`-prefix [class_prefix]`|Adds the specified `class_prefix` string to the beginning of all class names.|
+
+The generated classes only require `libxml2` and work on macOS, iOS, and tvOS.
+
+When you use these classes in your project, you must make sure to link your build target against `libxml2`.
+
+In Bazel this may be done as follows:
+
+```
+    sdk_dylibs = [
+        "libxml2",
+    ],
+```
+
+### Hack
+
+Pull requests are welcome.
+
+#### Code Style
+
+All new code submissions should, wherever possible, adhere to the
+[Google Objective-C Style Guide](https://google.github.io/styleguide/objcguide.xml).
+
+Please run `tools/format.sh` from the root of the repository before sending a pull request.
+
+#### Tests
+
+New code should be tested by unit tests that pass as submission time.
+
+## Status
+
+### Working
 
 - element default type
 - objc & swift 2.0 support (generates FORMATTED code) ** 1.5 **
-- handles namespacesd xsd ** 1.5 ** 
+- handles namespacesd xsd ** 1.5 **
 - Complex type elements
 - Simple type elements/attributes (standard and custom)
-	- **42/44 types defined by the w3c work**<br/> 
+	- **42/44 types defined by the w3c work**<br/>
 	outstanding: 		base64Binary, hexBinary
 - Inheritance by extension
 - restrictions with enumeration support (thanks to Alex Smith for the initial trigger) ** 1.4 **
@@ -32,54 +89,49 @@ The generator is a framework that is completely seperate from the GUI. And thus 
 - annotations of elements that are converted to comments ** 1.3 **
 - anonymous 'inner' types (complex and simple)
 
-the **generated parser** only requires libxml and I have tested it on **IOS as well as OSX**
-- **(Remember: to use the classes, link your target against libxml2 (!))**
+### Not Working
 
-The generator itself uses the NSXML* tree based API and is for OSX only.
+- References to elements/attributes via the ref= attribute.
+- The min & maxOccurences of elements inside a sequence/choice must be specified on element itself as opposed to the sequence itself.
 
-### Biggest pain points
-1. So far the generator does NOT handle references to elements/attributes via the ref= attribute.
-2. The min & maxOccurances of elements inside a sequence/choice must be specified on element itself as opposed to the sequence itself
+## Directory Structure
 
----
+### xsd2swift
 
-The Project is still in alpha phase, BUT real world usage is already be possible. *and practiced* <br/>
-**A demo project is included** and I used it to generate XML Parsers for **two commercial projects already** (Ill merge back fixes as I find the time).
+Project source code.
 
-### how-to (based on 1.0)
-##### (very brief ;))
-1. download the sourcecode and use XCode 7 to build the xsd2cocoa mac app. (At this point, Im not providing a binary)
-2. Upon starting the app you see a window 
-![1](https://raw.github.com/Daij-Djan/xsd2cocoa/master/README-files/1.png)
+### tests
 
-3. here you specify:
-	- the XSD to process
-	- the output folder for the generated .m/.h files
-	- the template to use (built-in vs. custom path)
-![2](https://raw.github.com/Daij-Djan/xsd2cocoa/master/README-files/2.png)
+Source code for project tests.
 
-3. After specifying the in- and output paths you hit 'write code' and you get ready to use .h/.m files. **(Remember: to use the classes, link against libxml2 (!))**
-![3](https://raw.github.com/Daij-Djan/xsd2cocoa/master/README-files/3.png)
+### tools
 
-### credits
-The basic code was on google projects. **The original xsd2cocoa was written by Stefan Winter** in 2011 and even if not really usable, it was **already quite awesome**
+Scripts for building, cleaning, and other development-time activities.
 
-I made numerous fixes and improvements to the generator.
-- additions to properly deal with lots of more XSD features (too many to list here)
-- new features to the template to make things more customizable
-- a lot of refactoring. Modernizing, getting rid of code... I would say I removed 1/2 the code ;)
-- addded a UI for the app as well as a Demo project to make it easier to use
-- modernized and completed the templates used to generate the code
+### third_party
 
-The code uses the MGTemplateEngine by Matt Gemmel
+Submodules for third-party code.
 
-### changelog
+At the moment these submodules are all forks of upstream repositories to deal with version control.
 
-#### 1.6
-- fixed a memory leak that parsing a URL
-- made the reader not break if there are comments in global level
-- fixed the xsd types gDay, gMonth, gMonthDay, ...
-- fixed unit tests
-- improved date parsing
-- fixed some swift issues where parsers crashed
-- setting enUSPOSIXLocale for all formatters so XML types are parsed ok
+## License
+
+Please review the [Copyright Notices](NOTICE.md).
+
+```
+xsd2swift: Command line tool to convert XML schemas to Swift classes.
+Copyright (C) 2017  Steven E Wright
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+```

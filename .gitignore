@@ -1,48 +1,31 @@
-# Xcode
+# xsd2swift: Command line tool to convert XML schemas to Swift classes.
+# Copyright (C) 2017  Steven E Wright
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Because we use Finder
 .DS_Store
-*/build/*
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
-profile
-*.moved-aside
-DerivedData
-.idea/
-*.hmap
-*.xccheckout
-#CocoaPods
-Pods
-demo/xsdtest/WLFavdef.h
-demo/xsdtest/WLFavdef.m
-demo/xsdtest/WLFG.h
-demo/xsdtest/WLFG.m
-demo/xsdtest/WLFG+File.h
-demo/xsdtest/WLFG+File.m
-demo/xsdtest/WLGroupdef.h
-demo/xsdtest/WLGroupdef.m
-demo/xsdtest/xsdtest.h
-demo2/Address/Address.h
-demo2/Address/MYCOMPANYAddress.h
-demo2/Address/MYCOMPANYAddress.m
-demo2/Address/MYCOMPANYAddress+File.h
-demo2/Address/MYCOMPANYAddress+File.m
-demo2/Address/MYCOMPANYStreetInfo.h
-demo2/Address/MYCOMPANYStreetInfo.m
-demo2/Address/MYCOMPANYUnitInfo.h
-demo2/Address/MYCOMPANYUnitInfo.m
-demos/weblinks-demo/weblinks-ios/generated/Sources
-demos/weblinks-demo/weblinks-osx/generated/Sources
-demos/simpletypes-demo/simpletypes_ios/Generated/Sources
-demos/simpletypes-demo/simpletypes_osx/Generated/Sources
-demos/address-demo/addressTest_ios/Generated/Sources
-demos/address-demo/addressTest_osx/Generated/Sources
-demos/MyPantry-demo/MyPantry-ios/generated/Sources
-demos/MyPantry-demo/MyPantry-osx/generated/Sources
-demos/SampleLanguageData/SampleLanguageData-ios/generated/Sources
-demos/SampleLanguageData/SampleLanguageData-osx/generated/Sources
+
+# Because we use Bazel
+bazel-*
+*.xcodeproj
+*.xcworkspace
+
+# Because we use Tulsi
+tulsigen-*
+*.tulsiconf-user
+/tulsi-workspace
+
+# For our build script.
+/out
