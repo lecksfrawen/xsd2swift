@@ -27,6 +27,7 @@
 
 @interface XSDschema ()
 
+@property (strong, nonatomic) NSString* schemaId;
 @property (strong, nonatomic) NSURL* schemaUrl;
 @property (strong, nonatomic) NSString* targetNamespace;
 @property (strong, nonatomic) NSArray* allNamespaces;
@@ -72,6 +73,13 @@
 - (id) initWithNode:(NSXMLElement*)node targetNamespacePrefix:(NSString*)prefix error:(NSError**)error  {
 	self = [super initWithNode:node schema:nil];
     if(self) {
+        _knownSimpleTypeDict = [NSMutableDictionary dictionary];
+        self.simpleTypes = [NSMutableArray array];
+        _knownComplexTypeDict = [NSMutableDictionary dictionary];
+        self.complexTypes = [NSMutableArray array];
+        
+        self.schemaId = [[node attributeForName: @"id"] stringValue];
+        
         /* Get namespaces and set derived class prefix */
         self.targetNamespace = [[node attributeForName: @"targetNamespace"] stringValue];
         self.allNamespaces = [node namespaces];
@@ -101,83 +109,9 @@
             self.xmlSchemaNamespace = @"";
         }
         
-        /* Add basic simple types known in the built-in types */
-        _knownSimpleTypeDict = [NSMutableDictionary dictionary];
-        for(XSSimpleType *aSimpleType in [XSSimpleType knownSimpleTypesForSchema:self]) {
-            [_knownSimpleTypeDict setValue: aSimpleType forKey: aSimpleType.name];
-        }
-        
-        /* Add custom simple types */
-        self.simpleTypes = [NSMutableArray array];
-        
-        /* Grab all elements that are in the schema base with the simpleType element tag */
-        NSArray* stNodes = [node nodesForXPath: self.XPathForSchemaSimpleTypes error: error];
-
-        /* Iterate through the found elements */
-        for (NSXMLElement* aChild in stNodes) {
-            XSSimpleType* aST = [[XSSimpleType alloc] initWithNode:aChild schema:self];
-            [((NSMutableDictionary*)_knownSimpleTypeDict) setObject:aST forKey:aST.name];
-            [((NSMutableArray*)self.simpleTypes) addObject:aST];
-        }
-
-        /* Add complex types */
-        _knownComplexTypeDict = [NSMutableDictionary dictionary];
-        self.complexTypes = [NSMutableArray array];
-        NSArray* ctNodes = [node nodesForXPath: self.XPathForSchemaComplexTypes error: error];
-        /* Iterate through the complex types found and create node elements for them */
-        for (NSXMLElement* aChild in ctNodes) {
-            XSDcomplexType* aCT = [[XSDcomplexType alloc] initWithNode:aChild schema:self];
-            [((NSMutableDictionary*)_knownComplexTypeDict) setObject:aCT forKey:aCT.name];
-            [((NSMutableArray*)self.complexTypes) addObject: aCT];
-        }
-
-        /* Add the globals elements */
-        NSMutableArray* globalElements = [NSMutableArray array];
-        NSArray* geNodes = [node nodesForXPath: self.XPathForSchemaGlobalElements error: error];
-        for (NSXMLElement* aChild in geNodes) {
-            XSDelement* anElement = [[XSDelement alloc] initWithNode: aChild schema: self];
-            [globalElements addObject: anElement];
-        }
-
-        /* For each global element found, connect the type */
-        for (XSDelement* anElement in globalElements) {
-            id<XSType> aType = [anElement schemaType];
-            /* For the type check if it is in our found complex types */
-            if( [aType isMemberOfClass: [XSDcomplexType class]]) {
-                ((XSDcomplexType*)aType).globalElements = [((XSDcomplexType*)aType).globalElements arrayByAddingObject: anElement];
-            }
-        }
-	}
-    
-    /* Return our created object with all the elements and generated types */
-	return self;
-}
-
-- (id) initWithUrl: (NSURL*) schemaUrl targetNamespacePrefix: (NSString*) prefix error: (NSError**) error {
-    NSData* data = [NSData dataWithContentsOfURL: schemaUrl];
-    /* If we do not have data present an instance error that we cannot open the xsd file at the given location */
-    if(!data) {
-        if(error) {
-            *error = [NSError errorWithDomain:@"XSDschema" code:1 userInfo:@{NSLocalizedRecoverySuggestionErrorKey: [NSString stringWithFormat:@"Cant open xsd file at %@", schemaUrl]}];
-        }
-        return nil;
-    }
-    /* Create a document tree structure */
-    NSXMLDocument* doc = [[NSXMLDocument alloc] initWithData: data options: 0 error: error];
-    if(!doc) {
-        return nil;
-    }
-    
-    /* From the root element, grab the complex, simple, and elements into their respective arrays */
-    self = [self initWithNode: [doc rootElement] targetNamespacePrefix: prefix error: error];
-    /* Continue to setup the schema */
-    if(self) {
-        /* The location of where our schema is located */
-        self.schemaUrl = schemaUrl;
-        
         //handle includes & imports
-        NSArray* iNodes = [[doc rootElement] nodesForXPath: self.XPathForSchemaIncludes error: error];
-        NSArray* iNodes2 = [[doc rootElement] nodesForXPath: self.XPathForSchemaImports error: error];
+        NSArray* iNodes = [node nodesForXPath: self.XPathForSchemaIncludes error: error];
+        NSArray* iNodes2 = [node nodesForXPath: self.XPathForSchemaImports error: error];
         if(iNodes2.count) {
             NSMutableArray *newNodes = [iNodes2 mutableCopy];
             if(iNodes.count) {
@@ -189,9 +123,9 @@
         /* For the imported schemas, grab their complex and simple types of their elements */
         self.includedSchemas = [NSMutableArray array];
         for (NSXMLElement* aChild in iNodes) {
-
+            
             id schemaLocation = [aChild attributeForName:@"schemaLocation"].stringValue;
-            NSURL *url = [NSURL URLWithString:schemaLocation relativeToURL:schemaUrl];
+            NSURL *url = [NSURL URLWithString:schemaLocation relativeToURL:self.schemaUrl];
             if(![[NSFileManager defaultManager] isReadableFileAtPath:url.path]) {
                 if(error) {
                     *error = [NSError errorWithDomain:@"XSDschema" code:50 userInfo:@{@"url":url, NSLocalizedRecoverySuggestionErrorKey: [NSString stringWithFormat:@"Cant open included xsd file at %@.", url]}];
@@ -218,6 +152,78 @@
                 [(NSMutableArray*)self.simpleTypes addObject:ct];
             }
         }
+        
+        /* Add basic simple types known in the built-in types */
+        for(XSSimpleType *aSimpleType in [XSSimpleType knownSimpleTypesForSchema:self]) {
+            [_knownSimpleTypeDict setValue: aSimpleType forKey: aSimpleType.name];
+            [((NSMutableArray*)self.simpleTypes) addObject:aSimpleType];
+        }
+        
+        /* Add custom simple types */
+        /* Grab all elements that are in the schema base with the simpleType element tag */
+        NSArray* stNodes = [node nodesForXPath: self.XPathForSchemaSimpleTypes error: error];
+
+        /* Iterate through the found elements */
+        for (NSXMLElement* aChild in stNodes) {
+            XSSimpleType* aST = [[XSSimpleType alloc] initWithNode:aChild schema:self];
+            [((NSMutableDictionary*)_knownSimpleTypeDict) setObject:aST forKey:aST.name];
+            [((NSMutableArray*)self.simpleTypes) addObject:aST];
+        }
+
+        /* Add complex types */
+        NSArray* ctNodes = [node nodesForXPath: self.XPathForSchemaComplexTypes error: error];
+        /* Iterate through the complex types found and create node elements for them */
+        for (NSXMLElement* aChild in ctNodes) {
+            XSDcomplexType* aCT = [[XSDcomplexType alloc] initWithNode:aChild schema:self];
+            [((NSMutableDictionary*)_knownComplexTypeDict) setObject:aCT forKey:aCT.name];
+            [((NSMutableArray*)self.complexTypes) addObject: aCT];
+        }
+
+        /* Add the globals elements */
+        NSMutableArray* globalElements = [NSMutableArray array];
+        NSArray* geNodes = [node nodesForXPath: self.XPathForSchemaGlobalElements error: error];
+        for (NSXMLElement* aChild in geNodes) {
+            XSDelement* anElement = [[XSDelement alloc] initWithNode: aChild schema: self];
+            [globalElements addObject: anElement];
+        }
+
+        /* For each global element found, connect the type */
+        for (XSDelement* anElement in globalElements) {
+            id<XSType> aType = [anElement schemaType];
+            /* For the type check if it is in our found complex types */
+//            if( [aType isMemberOfClass: [XSDcomplexType class]]) {
+                ((XSDcomplexType*)aType).globalElements = [((XSDcomplexType*)aType).globalElements arrayByAddingObject: anElement];
+//            }
+        }
+	}
+    
+    /* Return our created object with all the elements and generated types */
+	return self;
+}
+
+- (id) initWithUrl: (NSURL*) schemaUrl targetNamespacePrefix: (NSString*) prefix error: (NSError**) error {
+    NSData* data = [NSData dataWithContentsOfURL: schemaUrl];
+    /* If we do not have data present an instance error that we cannot open the xsd file at the given location */
+    if(!data) {
+        if(error) {
+            *error = [NSError errorWithDomain:@"XSDschema" code:1 userInfo:@{NSLocalizedRecoverySuggestionErrorKey: [NSString stringWithFormat:@"Cant open xsd file at %@", schemaUrl]}];
+        }
+        return nil;
+    }
+    /* Create a document tree structure */
+    NSXMLDocument* doc = [[NSXMLDocument alloc] initWithData: data options: 0 error: error];
+    if(!doc) {
+        return nil;
+    }
+    
+    /* The location of where our schema is located */
+    self.schemaUrl = schemaUrl;
+    
+    /* From the root element, grab the complex, simple, and elements into their respective arrays */
+    self = [self initWithNode: [doc rootElement] targetNamespacePrefix: prefix error: error];
+    /* Continue to setup the schema */
+    if (self) {
+        
     }
     
     return self;
@@ -609,6 +615,7 @@
     }
     
     assert(vName.length); //EVERYTHING has a name
+    
     return vName;
 }
 
@@ -653,12 +660,12 @@
     NSParameterAssert(error);
     
     /* SOURCE CODE - If we want to write source code */
-    if (options & XSDschemaGeneratorOptionSourceCode) {
+    if (options & (XSDschemaGeneratorOptionSourceCode | XSDschemaGeneratorOptionSourceCodeWithSubfolders)) {
         /* Create the path that will contain all the code */
         NSURL *srcFolderUrl = [destinationFolder URLByAppendingPathComponent:@"Sources" isDirectory:YES];
         
         /* Create the actual directory at the location defined above */
-        if(![[NSFileManager defaultManager] createDirectoryAtURL:srcFolderUrl withIntermediateDirectories:NO attributes:nil error:error]) {
+        if(![[NSFileManager defaultManager] createDirectoryAtURL:srcFolderUrl withIntermediateDirectories:YES attributes:nil error:error]) {
             BOOL isDir;
             /* Ensure that the item was created */
             if(![[NSFileManager defaultManager] fileExistsAtPath:srcFolderUrl.path isDirectory:&isDir] || !isDir) {
@@ -666,7 +673,7 @@
             }
         }
         /* If all is well, start writing the code into the directory we created */
-        if(![self writeCodeInto:srcFolderUrl error:error]) {
+        if(![self writeCodeInto:srcFolderUrl createSubfolders:options & XSDschemaGeneratorOptionSourceCodeWithSubfolders error:error]) {
             return NO;
         }
         if(![self formatFilesInFolder:srcFolderUrl error:nil])  {
@@ -686,6 +693,7 @@
  *
  */
 - (BOOL) writeCodeInto: (NSURL*) destinationFolder
+      createSubfolders: (BOOL) createSubfolders
                  error: (NSError**) error {
     /* If there is no template, return that is failed */
     if(!self.complexTypeArrayType) {
@@ -712,7 +720,7 @@
                                          withVariables:type.substitutionDict];
             
             NSString* headerFileName = [NSString stringWithFormat: @"%@.%@", type.targetClassFileName, self.headerTemplateExtension];
-            NSURL* headerFilePath = [destinationFolder URLByAppendingPathComponent: headerFileName];
+            NSURL* headerFilePath = [createSubfolders ? [self subfolderForURL:destinationFolder schema:type.schema] : destinationFolder URLByAppendingPathComponent: headerFileName];
             BOOL br = [result writeToURL: headerFilePath atomically:YES encoding: NSUTF8StringEncoding error: error];
 
             /* Ensure that there was no errors for writing */
@@ -728,7 +736,7 @@
                                          withVariables: type.substitutionDict];
             
             NSString* classFileName = [NSString stringWithFormat: @"%@.%@", type.targetClassFileName, self.classTemplateExtension];
-            NSURL* classFilePath = [destinationFolder URLByAppendingPathComponent: classFileName];
+            NSURL* classFilePath = [createSubfolders ? [self subfolderForURL:destinationFolder schema:type.schema] : destinationFolder URLByAppendingPathComponent: classFileName];
             BOOL br = [result writeToURL:classFilePath atomically:YES encoding: NSUTF8StringEncoding error: error];
             
             /* Ensure that there was no errors for writing */
@@ -744,7 +752,7 @@
                                              withVariables: type.substitutionDict];
                 
                 NSString* headerFileName = [NSString stringWithFormat: @"%@+File.%@", type.targetClassFileName, self.readerHeaderTemplateExtension];
-                NSURL* headerFilePath = [destinationFolder URLByAppendingPathComponent: headerFileName];
+                NSURL* headerFilePath = [createSubfolders ? [self subfolderForURL:destinationFolder schema:type.schema] : destinationFolder URLByAppendingPathComponent: headerFileName];
                 BOOL br = [result writeToURL: headerFilePath atomically:YES encoding: NSUTF8StringEncoding error: error];
 
                 /* Ensure that there was no errors for writing */
@@ -758,7 +766,7 @@
                                              withVariables: type.substitutionDict];
                 
                 NSString* classFileName = [NSString stringWithFormat: @"%@+File.%@", type.targetClassFileName, self.readerClassTemplateExtension];
-                NSURL* classFilePath = [destinationFolder URLByAppendingPathComponent: classFileName];
+                NSURL* classFilePath = [createSubfolders ? [self subfolderForURL:destinationFolder schema:type.schema] : destinationFolder URLByAppendingPathComponent: classFileName];
                 BOOL br = [result writeToURL: classFilePath atomically:YES encoding: NSUTF8StringEncoding error: error];
                 
                 /* Ensure that there was no errors for writing */
@@ -784,7 +792,7 @@
                                          withVariables:type.substitutionDict];
             
             NSString* headerFileName = [NSString stringWithFormat: @"%@.%@", type.enumerationFileName, self.enumHeaderTemplateExtension];
-            NSURL* headerFilePath = [destinationFolder URLByAppendingPathComponent: headerFileName];
+            NSURL* headerFilePath = [createSubfolders ? [self subfolderForURL:destinationFolder schema:type.schema] : destinationFolder URLByAppendingPathComponent: headerFileName];
             BOOL br = [result writeToURL: headerFilePath atomically:YES encoding: NSUTF8StringEncoding error: error];
             
             /* Ensure that there was no errors for writing */
@@ -800,7 +808,7 @@
                                          withVariables: type.substitutionDict];
             
             NSString* classFileName = [NSString stringWithFormat: @"%@.%@", type.enumerationFileName, self.enumClassTemplateExtension];
-            NSURL* classFilePath = [destinationFolder URLByAppendingPathComponent: classFileName];
+            NSURL* classFilePath = [createSubfolders ? [self subfolderForURL:destinationFolder schema:type.schema] : destinationFolder URLByAppendingPathComponent: classFileName];
             BOOL br = [result writeToURL:classFilePath atomically:YES encoding: NSUTF8StringEncoding error: error];
             
             /* Ensure that there was no errors for writing */
@@ -829,6 +837,24 @@
     }
     
     return YES;
+}
+
+- (NSURL *)subfolderForURL:(NSURL *)url schema:(XSDschema *)schema {
+    NSURL *destinationSubfolder = [url copy];
+    if (schema.schemaId) {
+        destinationSubfolder = [destinationSubfolder URLByAppendingPathComponent:schema.schemaId isDirectory:YES];
+    }
+    else {
+        destinationSubfolder = [destinationSubfolder URLByAppendingPathComponent:schema.schemaUrl.lastPathComponent.stringByDeletingPathExtension isDirectory:YES];
+    }
+    if(![[NSFileManager defaultManager] createDirectoryAtURL:destinationSubfolder withIntermediateDirectories:YES attributes:nil error:nil]) {
+        BOOL isDir;
+        /* Ensure that the item was created */
+        if(![[NSFileManager defaultManager] fileExistsAtPath:destinationSubfolder.path isDirectory:&isDir] || !isDir) {
+            return NO;
+        }
+    }
+    return destinationSubfolder;
 }
 
 - (NSString*)contentOfObjcUmbrellaHeaderForFolder:(NSURL*)destinationFolder {

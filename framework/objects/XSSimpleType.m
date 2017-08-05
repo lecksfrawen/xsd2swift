@@ -42,10 +42,20 @@
 @property (strong, nonatomic) NSString* enumWriteValueCode;
 @property (strong, nonatomic) NSString* enumWritePrefixCode;
 
+@property (strong, nonatomic) NSArray* globalElements;
+
 @end
 
 @implementation XSSimpleType {
     MGTemplateEngine *engine;
+- (instancetype)init {
+}
+
+    self = [super init];
+    if (self) {
+         _globalElements = [NSMutableArray array];
+    }
+    return self;
 }
 
 - (id) initWithNode:(NSXMLElement*)node schema:(XSDschema*)schema {
@@ -447,7 +457,7 @@
     }
     
     NSString *prefix = [self.schema classPrefixForType:self];
-    NSString *rtn = [NSString stringWithFormat: @"%@%@Enum", prefix, vName];
+    NSString *rtn = [NSString stringWithFormat: @"%@%@%@", prefix, vName, [vName hasSuffix:@"Enum"] ? @"" : @"Enum"];
     return rtn;
 }
 
