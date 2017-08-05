@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		42B54BE71C08AF850092DBB8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 42B54BE61C08AF850092DBB8 /* main.m */; };
+		42B54BEB1C08AFEB0092DBB8 /* XSDConverterCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B42F9EB61A48657E0007FC96 /* XSDConverterCore.framework */; };
 		B33F4FC41B4E9AEB00797D74 /* DDXMLValidator.h in Headers */ = {isa = PBXBuildFile; fileRef = B33F4FC21B4E9AEB00797D74 /* DDXMLValidator.h */; };
 		B33F4FC51B4E9AEB00797D74 /* DDXMLValidator.m in Sources */ = {isa = PBXBuildFile; fileRef = B33F4FC31B4E9AEB00797D74 /* DDXMLValidator.m */; };
 		B342A5231A9655060061C546 /* SimpleTypesTestsSwift.m in Sources */ = {isa = PBXBuildFile; fileRef = B342A5211A9655010061C546 /* SimpleTypesTestsSwift.m */; };
@@ -123,6 +125,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		42B54BE21C08AF850092DBB8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		B42F9ED21A48657E0007FC96 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,6 +148,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		42B54BE41C08AF850092DBB8 /* xsd2cocoatool */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xsd2cocoatool; sourceTree = BUILT_PRODUCTS_DIR; };
+		42B54BE61C08AF850092DBB8 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		B3142BF71BF7E0620052E2E7 /* XSDConverter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = XSDConverter.entitlements; sourceTree = "<group>"; };
 		B33F4FC21B4E9AEB00797D74 /* DDXMLValidator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLValidator.h; sourceTree = "<group>"; };
 		B33F4FC31B4E9AEB00797D74 /* DDXMLValidator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLValidator.m; sourceTree = "<group>"; };
@@ -247,6 +260,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		42B54BE11C08AF850092DBB8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				42B54BEB1C08AFEB0092DBB8 /* XSDConverterCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B42F9EB21A48657E0007FC96 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -275,6 +296,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		42B54BE51C08AF850092DBB8 /* xsd2cocoatool */ = {
+			isa = PBXGroup;
+			children = (
+				42B54BE61C08AF850092DBB8 /* main.m */,
+			);
+			path = xsd2cocoatool;
+			sourceTree = "<group>";
+		};
 		B33F4FC11B4E9AEB00797D74 /* DDXMLValidator */ = {
 			isa = PBXGroup;
 			children = (
@@ -526,6 +555,7 @@
 				B42F9ED71A48663F0007FC96 /* framework */,
 				B42F9F561A4890CE0007FC96 /* tests */,
 				F8E422B7138834E90047AA8C /* External Frameworks */,
+				42B54BE51C08AF850092DBB8 /* xsd2cocoatool */,
 				F8E422B5138834E90047AA8C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -536,6 +566,7 @@
 				B45720CE1857D487005632B7 /* XSDConverter.app */,
 				B42F9EB61A48657E0007FC96 /* XSDConverterCore.framework */,
 				B42F9F411A488F830007FC96 /* XSDConverterCoreTests.xctest */,
+				42B54BE41C08AF850092DBB8 /* xsd2cocoatool */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -587,6 +618,23 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		42B54BE31C08AF850092DBB8 /* xsd2cocoatool */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 42B54BEA1C08AF850092DBB8 /* Build configuration list for PBXNativeTarget "xsd2cocoatool" */;
+			buildPhases = (
+				42B54BE01C08AF850092DBB8 /* Sources */,
+				42B54BE11C08AF850092DBB8 /* Frameworks */,
+				42B54BE21C08AF850092DBB8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = xsd2cocoatool;
+			productName = xsd2cocoatool;
+			productReference = 42B54BE41C08AF850092DBB8 /* xsd2cocoatool */;
+			productType = "com.apple.product-type.tool";
+		};
 		B42F9EB51A48657E0007FC96 /* XSDConverterCore */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B42F9ECF1A48657E0007FC96 /* Build configuration list for PBXNativeTarget "XSDConverterCore" */;
@@ -651,6 +699,9 @@
 				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0820;
 				TargetAttributes = {
+					42B54BE31C08AF850092DBB8 = {
+						CreatedOnToolsVersion = 6.4;
+					};
 					B42F9EB51A48657E0007FC96 = {
 						CreatedOnToolsVersion = 6.2;
 					};
@@ -683,6 +734,7 @@
 				B45720CD1857D487005632B7 /* XSDConverter */,
 				B42F9EB51A48657E0007FC96 /* XSDConverterCore */,
 				B42F9F401A488F830007FC96 /* XSDConverterCoreTests */,
+				42B54BE31C08AF850092DBB8 /* xsd2cocoatool */,
 			);
 		};
 /* End PBXProject section */
@@ -739,6 +791,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		42B54BE01C08AF850092DBB8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				42B54BE71C08AF850092DBB8 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B42F9EB11A48657E0007FC96 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -815,6 +875,74 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		42B54BE81C08AF850092DBB8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		42B54BE91C08AF850092DBB8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		B42F9ED01A48657E0007FC96 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1145,6 +1273,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		42B54BEA1C08AF850092DBB8 /* Build configuration list for PBXNativeTarget "xsd2cocoatool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				42B54BE81C08AF850092DBB8 /* Debug */,
+				42B54BE91C08AF850092DBB8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		B42F9ECF1A48657E0007FC96 /* Build configuration list for PBXNativeTarget "XSDConverterCore" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
