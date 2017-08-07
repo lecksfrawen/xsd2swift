@@ -93,19 +93,17 @@ Project source code.
 
 Source code for project tests.
 
-### tools
-
-Scripts for building, cleaning, and other development-time activities.
-
 ### third_party
 
 Submodules for third-party code.
 
 At the moment these submodules are all forks of upstream repositories to deal with version control.
 
-## License
+## Notices
 
-Please review the [Copyright Notices](NOTICE.md).
+[Contributors](CONTRIBUTORS.md).
+
+[Copyright Notice](NOTICE.md).
 
 ```
 xsd2swift: Command line tool to convert XML schemas to Swift classes.
