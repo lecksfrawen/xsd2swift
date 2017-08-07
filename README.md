@@ -53,21 +53,6 @@ In Bazel this may be done as follows:
     ],
 ```
 
-### Hack
-
-Pull requests are welcome.
-
-#### Code Style
-
-All new code submissions should, wherever possible, adhere to the
-[Google Objective-C Style Guide](https://google.github.io/styleguide/objcguide.xml).
-
-Please run `tools/format.sh` from the root of the repository before sending a pull request.
-
-#### Tests
-
-New code should be tested by unit tests that pass as submission time.
-
 ## Status
 
 ### Working
