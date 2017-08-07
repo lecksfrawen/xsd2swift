@@ -6,6 +6,10 @@ This tool creates Swift classes from XSD files. The generated Swift classes it p
 
 ## Instructions
 
+### Download a Binary
+
+Binary releases are available on the [releases page](https://github.com/StevenEWright/xsd2swift/releases).
+
 ### Get the Code
 
 ```
