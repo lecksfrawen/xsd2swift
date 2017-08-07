@@ -40,6 +40,7 @@ filegroup(
 
 objc_library(
     name = "MGTemplateEngine_sources",
+    pch = "third_party/MGTemplateEngine/MGTemplateEngine_Prefix.pch",
     srcs = glob([
         "third_party/MGTemplateEngine/ICUTemplateMatcher.m",
         "third_party/MGTemplateEngine/MGTemplateEngine.m",
