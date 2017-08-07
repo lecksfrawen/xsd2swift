@@ -19,7 +19,7 @@ Building `xsd2swift` requires [Bazel](http://bazel.build).
 From the root of the repository, run:
 
 ```
-tools/build.sh
+./build.sh
 ```
 
 The built command-line tools will be placed in:
