@@ -23,7 +23,7 @@ This project is a fork of [https://github.com/Daij-Djan/xsd2cocoa](https://githu
 in - notably [MarekR22's commandLineTool](https://github.com/MarekR22/xsd2cocoa/tree/commandLineTool).
 
 The fork occured on Aug 5, 2017, and the git commit history is available
-[on GitHub](commits/d384cc77b8ae830d24b9fbe1eb8d009f8a8d9b05).
+[on GitHub](https://github.com/StevenEWright/xsd2swift/commits/d384cc77b8ae830d24b9fbe1eb8d009f8a8d9b05).
 
 The code uses the MGTemplateEngine library by Matt Gemmel.
 
