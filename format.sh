@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+SCRIPT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd); cd $SCRIPT_DIR
+GIT_ROOT=$(git rev-parse --show-cdup); cd ./$GIT_ROOT
+
 echo "Formatting Code"
 pwd
 for DIRECTORY in xsd2swift tests

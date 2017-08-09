@@ -4,50 +4,55 @@
 
 This tool creates Swift classes from XSD files. The generated Swift classes it produces can be used to deserialize XML on iOS and macOS.
 
-## Instructions
+___
+**This project is in a broken state at the moment.**
+___
 
-### Download a Binary
+## Download a Binary
 
 Binary releases are available on the [releases page](https://github.com/StevenEWright/xsd2swift/releases).
 
-### Get the Code
-
-```
-git clone https://github.com/StevenEWright/xsd2swift.git && cd xsd2swift
-```
-
-### Build the Command Line tool
+## Build from Source
 
 Building `xsd2swift` requires [Bazel](http://bazel.build).
 
-From the root of the repository, run:
+Clone the repository:
+
+```
+git clone https://github.com/StevenEWright/xsd2swift.git xsd2swift && cd xsd2swift
+```
+
+**To install** xsd2swift into `/usr/local/bin/`:
+
+```
+./install.sh
+```
+
+**To only build** xsd2swift:
 
 ```
 ./build.sh
 ```
 
-The built command-line tools will be placed in:
-
-```
-out/xsd2swift
-```
-
 ### Use
 
-Produce Swift classes for the complex types represented in an XML schema document by invoking `xsd2swift` from the command line and redirecting the output to a file.
+Produce Swift classes for the complex types represented in an XML schema document by invoking `xsd2swift`:
 
 ```
-xsd2swift -schema [path] (-prefix [prefix])
+xsd2swift -schema [xsd_file_path] -out [existing_directory] (-prefix [prefix])
 ```
 
 |Option|Description|
 |--|--|
 |`-schema [path]`|The location of the XML schema.|
+|`-out [path]`|The directory in which to place the generated Swift classes.|
 |`-prefix [class_prefix]`|Adds the specified `class_prefix` string to the beginning of all class names.|
 
-The generated classes only require `libxml2` and work on macOS, iOS, and tvOS.
+The generated classes support Swift 4 and only require `libxml2`. They work on macOS, iOS, and tvOS.
 
 When you use these classes in your project, you must make sure to link your build target against `libxml2`.
+
+In Xcode this is done by adding `-lxml2` to your build target's `Other Linker Flags` build setting.
 
 In Bazel this may be done as follows:
 
@@ -57,51 +62,29 @@ In Bazel this may be done as follows:
     ],
 ```
 
-## Status
+In your bridging header, add:
 
-### Working
+```
+#import <Foundation/Foundation.h>
 
-- element default type
-- objc & swift 2.0 support (generates FORMATTED code) ** 1.5 **
-- handles namespacesd xsd ** 1.5 **
-- Complex type elements
-- Simple type elements/attributes (standard and custom)
-	- **42/44 types defined by the w3c work**<br/>
-	outstanding: 		base64Binary, hexBinary
-- Inheritance by extension
-- restrictions with enumeration support (thanks to Alex Smith for the initial trigger) ** 1.4 **
-- Static parsing methods for global elements (a category is generated for a complex type that is used as the root element)
-- Mapping xml namespaces to class name prefixes via a specific tag in a template. (without it, namespaces are mapped 1 : 1 to Class prefixes)
-- referencing external files to copy to the destination folder when generating code ** 1.2 **
-- nested sequences & choices
-- includes and imports of other XSD files ** 1.3 **
-- annotations of elements that are converted to comments ** 1.3 **
-- anonymous 'inner' types (complex and simple)
+#import <libxml/xpath.h>
+#import <libxml/xmlerror.h>
+#import <libxml/xmlreader.h>
+#import <libxml/xmlwriter.h>
+```
 
-### Not Working
+#### Formatting
 
-- References to elements/attributes via the ref= attribute.
-- The min & maxOccurences of elements inside a sequence/choice must be specified on element itself as opposed to the sequence itself.
+I like [Nick Lockwood's SwiftFormat](https://github.com/nicklockwood/SwiftFormat), personally.
 
-## Directory Structure
-
-### xsd2swift
-
-Project source code.
-
-### tests
-
-Source code for project tests.
-
-### third_party
-
-Submodules for third-party code.
-
-At the moment these submodules are all forks of upstream repositories to deal with version control.
+```
+brew update
+brew install swiftformat
+```
 
 ## Notices
 
-[Contributors](CONTRIBUTORS.md).
+** Please take a moment to review the list of [Contributors](CONTRIBUTORS.md)**.
 
 [Copyright Notice](NOTICE.md).
 

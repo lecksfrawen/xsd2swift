@@ -18,5 +18,5 @@
 SCRIPT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd); cd $SCRIPT_DIR
 GIT_ROOT=$(git rev-parse --show-cdup); cd ./$GIT_ROOT
 
-rm ./out/xsd2swift
-bazel build xsd2swift && mkdir -p ./out && cp bazel-bin/xsd2swift ./out/xsd2swift && bazel clean
+./build.sh
+cp out/xsd2swift /usr/local/bin/
