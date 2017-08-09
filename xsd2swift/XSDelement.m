@@ -191,10 +191,10 @@
   } else {
     if (self.type != nil) {
       id<XSType> type = [self.schema typeForName:self.type];
-      rtn = [[type arrayType] stringByAppendingFormat:@" <%@ *>", [type targetClassName]];
+      rtn = [type arrayType];
     } else {
       id<XSType> type = self.localType;
-      rtn = [type.arrayType stringByAppendingFormat:@" <%@ *>", [type targetClassName]];
+      rtn = type.arrayType;
     }
   }
 
@@ -210,7 +210,7 @@
 }
 
 - (NSString*)variableName {
-  return [XSDschema variableNameFromName:self.name multiple:!self.isSingleValue];
+  return [XSDschema variableNameFromName:[NSString stringWithFormat:@"%@E", self.name] multiple:!self.isSingleValue];
 }
 
 /*

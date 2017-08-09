@@ -447,10 +447,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     NSString* modifiedValue = enumType.value;
     if ([[[NSNumberFormatter alloc] init] numberFromString:modifiedValue])
       modifiedValue = [@"Value" stringByAppendingString:modifiedValue];
-    [rtn addObject:modifiedValue];
+    [rtn addObject:[self sanitizeIdentifier:modifiedValue]];
   }
 
   /* Return the populated array of values */
+  return rtn;
+}
+
+- (NSString*)sanitizeIdentifier:(NSString *)identifier {
+  NSCharacterSet* illegalChars = [NSCharacterSet characterSetWithCharactersInString:@"-#+"];
+
+  NSString* vName = [identifier
+      stringByReplacingCharactersInRange:NSMakeRange(0, 1)
+                              withString:[[identifier substringToIndex:1] uppercaseString]];
+  NSRange range = [vName rangeOfCharacterFromSet:illegalChars];
+  while (range.length > 0) {
+    // delete illegal char
+    vName = [vName stringByReplacingCharactersInRange:range withString:@""];
+    // range is now at next char
+    vName = [vName
+        stringByReplacingCharactersInRange:range
+                                withString:[[vName substringWithRange:range] uppercaseString]];
+
+    range = [vName rangeOfCharacterFromSet:illegalChars];
+  }
+
+  NSString* prefix = [self.schema classPrefixForType:self];
+  NSString* rtn = [NSString
+      stringWithFormat:@"%@%@%@", prefix, vName, [vName hasSuffix:@"Value"] ? @"" : @"Value"];
   return rtn;
 }
 

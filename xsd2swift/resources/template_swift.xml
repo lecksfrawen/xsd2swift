@@ -10,15 +10,15 @@
             <prefix></prefix>
             <attribute>
                 <![CDATA[
-                    {% if attribute.hasEnumeration %}self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))){% else %}self.{{ attribute.variableName }} = String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)){% /if %}]]>
+                    {% if attribute.hasEnumeration %}self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}.fromString(enumString: String(cString: {{ attribute.name }}AttrValue!)){% else %}self.{{ attribute.variableName }} = String(cString: {{ attribute.name }}AttrValue!){% /if %}]]>
             </attribute>
             <element>
                 <![CDATA[
-                    {% if element.isSingleValue %}self.{{ element.variableName }} = String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))
-                    {% else %}{{ element.variableName }}Array.append(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))){% /if %}]]>
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = String(cString: {{element.name}}ElementValue!)
+                    {% else %}{{ element.variableName }}Array.append(String(cString: {{element.name}}ElementValue!)){% /if %}]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: contentValue!)
                     self.value = value]]>
             </value>
         </read>
@@ -43,15 +43,15 @@
             <prefix></prefix>
             <attribute>
                 <![CDATA[
-                    self.{{ attribute.variableName }} = NSURL(string: String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
+                    self.{{ attribute.variableName }} = NSURL(string: String(cString: ({{ attribute.name }}AttrValue))!)]]>
             </attribute>
             <element>
                 <![CDATA[
-                    {% if element.isSingleValue %}self.{{ element.variableName }} = NSURL(string: String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-                    {% else %}{{ element.variableName }}Array.append(NSURL(string: String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad unwrapping{% /if %}]]>
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = NSURL(string: String(cString: ({{element.name}}ElementValue))!)
+                    {% else %}{{ element.variableName }}Array.append(NSURL(string: String(cString: ({{element.name}}ElementValue))!)!) //bad unwrapping{% /if %}]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: (contentValue))
                     self.value = NSURL(string: value)]]>
             </value>
         </read>
@@ -61,7 +61,7 @@
                 <![CDATA[let {{ attribute.variableName }}AttrValue: String? = String({{ attribute.variableName }})]]>
             </attribute>
             <element>
-                <![CDATA[let value = UnsafePointer<xmlChar>(NSString(string: {{ element.variableName }}Value.absoluteString).UTF8String)
+                <![CDATA[let value = UnsafePointer<xmlChar>(String(string: {{ element.variableName }}Value.absoluteString).utf8CString)
                     xmlTextWriterWriteString(writer, value)]]>
             </element>
             <value>
@@ -77,15 +77,15 @@
             <prefix></prefix>
             <attribute>
                 <![CDATA[
-                    self.{{ attribute.variableName }} = (String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)) == "true")]]>
+                    self.{{ attribute.variableName }} = (String(cString: ({{ attribute.name }}AttrValue)) == "true")]]>
             </attribute>
             <element>
                 <![CDATA[
-                    {% if element.isSingleValue %}self.{{ element.variableName }} = String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue)) == "true"
-                    {% else %}{{ element.variableName }}Array.append(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue)) == "true"){% /if %}]]>
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = String(cString: {{element.name}}ElementValue!) == "true"
+                    {% else %}{{ element.variableName }}Array.append(String(cString: {{element.name}}ElementValue!) == "true"){% /if %}]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: contentValue!)
                     self.value = (value == "true")]]>
             </value>
         </read>
@@ -109,43 +109,46 @@
         <read>
             <prefix>
                 <![CDATA[
-                    let numFormatter = NSNumberFormatter()
-                    numFormatter.numberStyle = .DecimalStyle
+                    let numFormatter = NumberFormatter()
+                    numFormatter.numberStyle = .decimal
                     numFormatter.locale = self.locale
                 ]]>
             </prefix>
             <attribute>
                 <![CDATA[
-                    self.{{ attribute.variableName }} = numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)!.integerValue]]>
+                    self.{{ attribute.variableName }} = numFormatter.number(from: String(cString: {{ attribute.name }}AttrValue!))!.intValue]]>
             </attribute>
             <element>
                 <![CDATA[
-                    {% if element.isSingleValue %}self.{{ element.variableName }} = numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.integerValue
-                    {% else %}{{ element.variableName }}Array.append(numFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.integerValue)  //bad force unwrapping{% /if %}]]>
+                    {% if element.isSingleValue %}
+                        self.{{ element.variableName }} = numFormatter.number(from: String(cString: {{element.name}}ElementValue!))!.intValue
+                    {% else %}
+                        {{ element.variableName }}Array.append(numFormatter.number(from: String(cString: {{element.name}}ElementValue!))!.intValue)  //bad force unwrapping
+                    {% /if %}]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: contentValue!)
                     if value != nil {
                     let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-                    self.value = numFormatter.numberFromString(trimmed).integerValue
+                    self.value = numFormatter.number(from: trimmed).intValue
                     }]]>
             </value>
         </read>
         <write>
             <prefix>
-                let numFormatter = NSNumberFormatter()
-                numFormatter.numberStyle = .DecimalStyle
+                let numFormatter = NumberFormatter()
+                numFormatter.numberStyle = .decimal
             </prefix>
             <attribute>
-                <![CDATA[let {{ attribute.variableName }}AttrValue = numFormatter.stringFromNumber(self.{{ attribute.variableName }}!)]]>
+                <![CDATA[let {{ attribute.variableName }}AttrValue = numFormatter.string(from: self.{{ attribute.variableName }} as NSNumber!)]]>
             </attribute>
             <element>
-                <![CDATA[xmlTextWriterWriteString(writer, numFormatter.stringFromNumber({{ element.variableName }}Value))]]>
+                <![CDATA[xmlTextWriterWriteString(writer, numFormatter.string(from: {{ element.variableName }}Value as NSNumber))]]>
             </element>
             <value>
-                <![CDATA[statusCode = xmlTextWriterWriteString(writer, numFormatter.stringFromNumber:self.value))
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, numFormatter.string(from: self.value as NSNumber))
                     if (statusCode < 0) {
-                    return statusCode
+                        return statusCode
                     }]]>
             </value>
         </write>
@@ -154,40 +157,40 @@
         <read>
             <prefix>
                 <![CDATA[
-                    let decFormatter = NSNumberFormatter()
-                    decFormatter.numberStyle = .DecimalStyle
+                    let decFormatter = NumberFormatter()
+                    decFormatter.numberStyle = .decimal
                     decFormatter.locale = self.locale]]>
             </prefix>
             <attribute>
                 <![CDATA[
-                    self.{{ attribute.variableName }} = decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)!.doubleValue]]>
+                    self.{{ attribute.variableName }} = decFormatter.number(from: String(cString: {{ attribute.name }}AttrValue!)!)!.doubleValue]]>
             </attribute>
             <element>
                 <![CDATA[
-                    {% if element.isSingleValue %}self.{{ element.variableName }} = decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.doubleValue
-                    {% else %}{{ element.variableName }}Array.append(decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!.doubleValue) //bad force unwrapping{% /if %}]]>
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = decFormatter.number(from: String(cString: {{element.name}}ElementValue!)!)!.doubleValue
+                    {% else %}{{ element.variableName }}Array.append(decFormatter.number(from: String(cString: {{element.name}}ElementValue!)!)!.doubleValue) //bad force unwrapping{% /if %}]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: contentValue!)
                     if value != nil {
                     let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-                    self.value = decFormatter.numberFromString(trimmed)!.doubleValue
+                    self.value = decFormatter.number(from: trimmed)!.doubleValue
                     }]]>
             </value>
         </read>
         <write>
             <prefix>
-                <![CDATA[let integerFormatter = NSNumberFormatter()
-                    integerFormatter.numberStyle = .DecimalStyle]]>
+                <![CDATA[let integerFormatter = NumberFormatter()
+                    integerFormatter.numberStyle = .decimal]]>
             </prefix>
             <attribute>
-                <![CDATA[let {{ attribute.variableName }}AttrValue = integerFormatter.stringFromNumber(self.{{ attribute.variableName }}!)]]>
+                <![CDATA[let {{ attribute.variableName }}AttrValue = integerFormatter.string(from: self.{{ attribute.variableName }}!)]]>
             </attribute>
             <element>
-                <![CDATA[xmlTextWriterWriteString(writer, integerFormatter.stringFromNumber({{ element.variableName }}Value))]]>
+                <![CDATA[xmlTextWriterWriteString(writer, integerFormatter.string(from: {{ element.variableName }}Value))]]>
             </element>
             <value>
-                <![CDATA[statusCode = xmlTextWriterWriteString(writer, integerFormatter.stringFromNumber(self.value))
+                <![CDATA[statusCode = xmlTextWriterWriteString(writer, integerFormatter.string(from: self.value))
                     if (statusCode < 0) {
                     return statusCode
                     }]]>
@@ -210,25 +213,25 @@
                     sRFC3339DateFormatterSubSeconds.timeZone = NSTimeZone(forSecondsFromGMT: 0)]]></prefix>
             <attribute>
                 <![CDATA[
-                    self.{{ attribute.variableName }} = sRFC3339DateFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))! )
+                    self.{{ attribute.variableName }} = sRFC3339DateFormatter.dateFromString( String(cString: {{ attribute.name }}AttrValue!)! )
                     if(self.{{ attribute.variableName }} == nil) {
-                    self.{{ attribute.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)
+                    self.{{ attribute.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString( String(cString: {{ attribute.name }}AttrValue!)!)
                     }]]>
             </attribute>
             <element>
                 <![CDATA[
-                    {% if element.isSingleValue %}self.{{ element.variableName }} = sRFC3339DateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = sRFC3339DateFormatter.dateFromString(String(cString: {{element.name}}ElementValue!)!)
                     if(self.{{ element.variableName }} == nil) {
-                    self.{{ element.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    self.{{ element.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString(String(cString: {{element.name}}ElementValue!)!)
                     }
-                    {% else %}var {{ element.variableName }}Temp = sRFC3339DateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    {% else %}var {{ element.variableName }}Temp = sRFC3339DateFormatter.dateFromString(String(cString: {{element.name}}ElementValue!)!)
                     if({{element.variableName }}Temp == nil) {
-                    {{ element.variableName }}Temp = sRFC3339DateFormatterSubSeconds.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+                    {{ element.variableName }}Temp = sRFC3339DateFormatterSubSeconds.dateFromString(String(cString: {{element.name}}ElementValue!)!)
                     }
                     {{ element.variableName }}Array.append(!) //bad force unwrapping{% /if %}]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: contentValue!)
                     if value != nil {
                     let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
                     self.value = sRFC3339DateFormatter.dateFromString(trimmed)
@@ -281,15 +284,15 @@
             </prefix>
             <attribute>
                 <![CDATA[
-                    self.{{ attribute.variableName }} = dateOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
+                    self.{{ attribute.variableName }} = dateOnlyFormatter.dateFromString( String(cString: {{ attribute.name }}AttrValue!)!)]]>
             </attribute>
             <element>
                 <![CDATA[
-                    {% if element.isSingleValue %}self.{{ element.variableName }} = dateOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-                    {% else %}{{ element.variableName }}Array.append(dateOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad force unwrapping{% /if %}]]>
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = dateOnlyFormatter.dateFromString(String(cString: {{element.name}}ElementValue!)!)
+                    {% else %}{{ element.variableName }}Array.append(dateOnlyFormatter.dateFromString(String(cString: {{element.name}}ElementValue!)!)!) //bad force unwrapping{% /if %}]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: contentValue!)
                     if value != nil {
                     let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
                     self.value = dateOnlyFormatter.dateFromString(trimmed)
@@ -339,15 +342,15 @@
             </prefix>
             <attribute>
                 <![CDATA[
-                    self.{{ attribute.variableName }} = timeOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
+                    self.{{ attribute.variableName }} = timeOnlyFormatter.dateFromString( String(cString: {{ attribute.name }}AttrValue!)!)]]>
             </attribute>
             <element>
                 <![CDATA[
-                    {% if element.isSingleValue %}self.{{ element.variableName }} = timeOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-                    {% else %}{{ element.variableName }}Array.append(timeOnlyFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad force unwrapping{% /if %}]]>
+                    {% if element.isSingleValue %}self.{{ element.variableName }} = timeOnlyFormatter.dateFromString(String(cString: {{element.name}}ElementValue!)!)
+                    {% else %}{{ element.variableName }}Array.append(timeOnlyFormatter.dateFromString(String(cString: {{element.name}}ElementValue!)!)!) //bad force unwrapping{% /if %}]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: contentValue!)
                     if value != nil {
                     let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
                     self.value = timeOnlyFormatter.dateFromString(trimmed)
@@ -397,7 +400,7 @@
         </read>
         <write>
             <element>
-                <![CDATA[let statusCode : Int = {{ element.variableName }}Value.writeWithWriter(writer)
+                <![CDATA[let statusCode : Int = {{ element.variableName }}Value.writeWithWriter(writer: writer)
                     if statusCode < 0 {
                     return statusCode
                     }]]>
@@ -408,19 +411,20 @@
             <class extension="swift">
                 <![CDATA[
                     import Foundation
-                    
+                    import libxml2
+
                     @objc
                     class {{ type.targetClassName }} {% if type.hasComplexBaseClass %}: {{ type.baseClass.targetClassName }} {% else %}: NSObject{% /if %}{
                     {% if type.hasComplexBaseClass %}
                     {% else %}
-                    /** Property that sets the NSLocale used by formatters of this type. It defaults to enUSPOSIX */
-                    var locale = NSLocale(localeIdentifier: "en_US_POSIX")
+                    /** Property that sets the Locale used by formatters of this type. It defaults to en_US_POSIX */
+                    var locale = Locale(identifier: "en_US_POSIX")
                     {% /if %}
                     {% for attribute in type.attributes %}
-                    var {{ attribute.variableName }}: {% if attribute.hasEnumeration %}{{ attribute.schemaType.enumerationName }}{% else %}{{ attribute.codeType }}{% /if %}?
+                    var `{{ attribute.variableName }}`: {% if attribute.hasEnumeration %}{{ attribute.schemaType.enumerationName }}{% else %}{{ attribute.codeType }}{% /if %}?
                     {% /for %}
                     {% for element in type.elements %}
-                    var {{ element.variableName }}: {% if element.hasEnumeration %}{{ element.schemaType.enumerationName }}{% else %}{{ element.codeType }}{% /if %}?
+                    var `{{ element.variableName }}`: {% if element.hasEnumeration %}{{ element.schemaType.enumerationName }}{% else %}{{ element.codeType }}{% /if %}?
                     {% /for %}
                     {% if type.hasSimpleBaseClass %}/**
                     the type's underlying value
@@ -428,11 +432,11 @@
                     var value: {% if type.baseClass.hasEnumeration %}{{ type.baseClass.enumerationName }}{% else %}{{ type.baseClass.targetClassName }}{% /if %}?{% /if %}
                     
                     {% if type.hasComplexBaseClass %}override {% /if %}func readAttributes(reader: xmlTextReaderPtr) {{% if type.hasComplexBaseClass %}
-                    super.readAttributes(reader)
+                    super.readAttributes(reader: reader)
                     {% /if %}{{ type.combinedReadPrefixCode }}
                     
                     {% for attribute in type.attributes %}
-                    let {{ attribute.name }}AttrName = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ attribute.name }}").UTF8String)
+                    let {{ attribute.name }}AttrName = UnsafePointer<xmlChar>("{{ attribute.name }}")
                     let {{ attribute.name }}AttrValue = xmlTextReaderGetAttribute(reader, {{ attribute.name }}AttrName)
                     if({{ attribute.name }}AttrValue != nil) {
                     {{ attribute.readCodeForAttribute }}
@@ -444,7 +448,7 @@
                     let _complexTypeXmlDept = xmlTextReaderDepth(reader)
                     {% if type.hasComplexBaseClass %}super.init(reader: reader){% else %}super.init(){% /if %}
                     {{ type.combinedReadPrefixCode }}{% if type.hasComplexBaseClass %}{% else %}
-                    self.readAttributes(reader){% /if %}
+                    self.readAttributes(reader: reader){% /if %}
                     {% for element in type.elements %}
                     {% if element.isSingleValue %}{% else %}var {{ element.variableName }}Array = {{ element.codeType }}(){% /if %}{% /for %}
                     
@@ -456,7 +460,7 @@
                     {% if type.hasComplexChildren %}var handledInChild = false{% /if %}
                     if(_currentNodeType == 1/*XML_READER_TYPE_ELEMENT*/ || _currentNodeType == 3/*XML_READER_TYPE_TEXT*/) {
                     let _currentElementNameXmlChar = xmlTextReaderConstLocalName(reader)
-                    let _currentElementName = String.fromCString(UnsafePointer<CChar>(_currentElementNameXmlChar))
+                    let _currentElementName = String(cString: _currentElementNameXmlChar!)
                     {% for element in type.elements %}if("{{element.name}}" == _currentElementName) {
                     
                     {% if element.hasComplexType %}
@@ -491,54 +495,59 @@
                     {% if element.isSingleValue %}{% else %}if({{ element.variableName }}Array.count > 0) { self.{{ element.variableName }} = {{ element.variableName }}Array }{% /if %}{% /for %}
                     }
                     
-                    {% if type.hasComplexBaseClass %}override {% /if %}var dictionary: [String: AnyObject] {
-                    var dict = [String: AnyObject]()
-                    {% if type.hasComplexBaseClass %}for (name, value) in super.dictionary {
-                    dict[name] = value
-                    }{% /if %}
+                    {% if type.hasComplexBaseClass %}override {% /if %}var dictionary: [String: Any] {
+                        var dict = [String: Any]()
+                        {% if type.hasComplexBaseClass %}
+                            for (name, value) in super.dictionary {
+                                dict[name] = value
+                            }
+                        {% /if %}
                     
-                    {% for attribute in type.attributes %}
-                    if(self.{{ attribute.variableName }} != nil) {
-                    {% if attribute.hasEnumeration %}
-                    let obj = {{ attribute.schemaType.enumerationName }}.toString(self.{{ attribute.variableName }}!)
-                    dict["{{ attribute.variableName }}"] = obj
-                    {% else %}
-                    dict["{{ attribute.variableName }}"] = self.{{ attribute.variableName }}!
-                    {% /if %}
+                        {% for attribute in type.attributes %}
+                            if(self.{{ attribute.variableName }} != nil) {
+                                {% if attribute.hasEnumeration %}
+                                    let obj = {{ attribute.schemaType.enumerationName }}.toString(enumType: self.{{ attribute.variableName }}!)
+                                    dict["{{ attribute.variableName }}"] = obj
+                                {% else %}
+                                    dict["{{ attribute.variableName }}"] = self.{{ attribute.variableName }}!
+                                {% /if %}
+                            }
+                        {% /for %}
+
+                        {% for element in type.elements %}
+                            {% if element.hasComplexType %}
+                                if(self.{{ element.variableName }} != nil) {
+                                    dict["{{ element.variableName }}"] = self.{{ element.variableName }}!{% if element.isSingleValue %}{% else %}.map({$0.dictionary}){% /if %}
+                                }
+                            {% else %}
+                                if(self.{{ element.variableName }} != nil) {
+                                    {% if element.hasEnumeration %}
+                                        let obj = {{ element.schemaType.enumerationName }}.toString(enumType: {{ element.variableName }}!)
+                                        dict["value"] = obj
+                                    {% else %}
+                                        dict["{{ element.variableName }}"] = self.{{ element.variableName }}!
+                                    {% /if %}
+                                }
+                            {% /if %}
+                        {% /for %}
+
+                        {% if type.hasSimpleBaseClass %}
+                            if(self.value != nil) {
+                                {% if type.baseClass.hasEnumeration %}
+                                    let obj = {{ type.baseClass.enumerationName }}.toString(enumType: self.value!)
+                                    dict["value"] = obj
+                                {% else %}
+                                    dict["value"] = self.value!
+                                {% /if %}
+                            }
+                        {% /if %}
+
+                        return dict
                     }
-                    {% /for %}
-                    {% for element in type.elements %}
-                    {% if element.hasComplexType %}
-                    if(self.{{ element.variableName }} != nil) {
-                    dict["{{ element.variableName }}"] = self.{{ element.variableName }}!{% if element.isSingleValue %}{% else %}.map({$0.dictionary}){% /if %}
-                    }
-                    {% else %}
-                    if(self.{{ element.variableName }} != nil) {
-                    {% if element.hasEnumeration %}
-                    let obj = {{ element.schemaType.enumerationName }}.toString({{ element.variableName }}!)
-                    dict["value"] = obj
-                    {% else %}
-                    dict["{{ element.variableName }}"] = self.{{ element.variableName }}!
-                    {% /if %}
-                    }
-                    {% /if %}
-                    {% /for %}{% if type.hasSimpleBaseClass %}
-                    if(self.value != nil) {
-                    {% if type.baseClass.hasEnumeration %}
-                    let obj = {{ type.baseClass.enumerationName }}.toString(self.value!)
-                    dict["value"] = obj
-                    {% else %}
-                    dict["value"] = self.value!
-                    {% /if %}
-                    }
-                    {% /if %}
                     
-                    return dict
-                    }
-                    
-                    {% if type.hasComplexBaseClass %}override {% /if %}func writeAttributes(writer:COpaquePointer) -> Int {
+                    {% if type.hasComplexBaseClass %}override {% /if %}func writeAttributes(writer: OpaquePointer) -> Int {
                     {% if type.hasComplexBaseClass %}
-                    super.writeAttributes(writer)
+                    super.writeAttributeswriter: writer)
                     {% /if %}
                     
                     {% for simpleType in type.simpleTypesInUse %}
@@ -557,9 +566,9 @@
                     return 0
                     }
                     
-                    {% if type.hasComplexBaseClass %}override {% /if %}func writeElements(writer:xmlTextWriterPtr) -> Int {
+                    {% if type.hasComplexBaseClass %}override {% /if %}func writeElements(writer: xmlTextWriterPtr) -> Int {
                     {% if type.hasComplexBaseClass %}
-                    super.writeElements(writer)
+                    super.writeElements(writer: writer)
                     {% /if %}
                     
                     {% for simpleType in type.simpleTypesInUse %}
@@ -593,15 +602,15 @@
                     return 0
                     }
                     
-                    {% if type.hasComplexBaseClass %}override {% /if %}func writeWithWriter(writer:COpaquePointer) -> Int {
+                    {% if type.hasComplexBaseClass %}override {% /if %}func writeWithWriter(writer: OpaquePointer) -> Int {
                     var statusCode = 0
                     
-                    statusCode = self.writeAttributes(writer)
+                    statusCode = self.writeAttributes(writer: writer)
                     if statusCode < 0 {
                     return statusCode
                     }
                     
-                    statusCode = self.writeElements(writer)
+                    statusCode = self.writeElements(writer: writer)
                     if statusCode < 0 {
                     return statusCode
                     }
@@ -622,7 +631,8 @@
             <class extension="swift">
                 <![CDATA[
                     import Foundation
-                    
+                    import libxml2
+
                     let kGlobalElementNamesArray = ["##elements##"{% for element in type.globalElements %},"{{ element.name }}"{% /for %}]
                     
                     extension {{ type.targetClassFileName }} {
@@ -634,8 +644,8 @@
                     * Description:     Generate a {{ type.targetClassName }} object from the path
                     *                  specified by the user
                     */
-                    class func {{ type.name }}FromURL(url:NSURL) -> {{ type.targetClassName }}? {
-                    let s = (url.absoluteString as NSString).UTF8String
+                    class func {{ type.name }}FromURL(url: NSURL) -> {{ type.targetClassName }}? {
+                    let s = (url.absoluteString as String!).cString(using: .utf8)
                     let reader = xmlReaderForFile( s, nil, 0/*options*/)
                     var ret: Int32
                     var obj: {{ type.targetClassName }}? = nil
@@ -646,11 +656,11 @@
                     ret = xmlTextReaderRead(reader)
                     if(ret == 1/*XML_READER_TYPE_ELEMENT*/) {
                     let elementNameXmlChar = xmlTextReaderConstLocalName(reader)
-                    let elementName = String.fromCString(UnsafePointer<CChar>(elementNameXmlChar))
+                    let elementName = String(cString: elementNameXmlChar!)
                     let array = [kGlobalElementNamesArray]
                     let predicate = NSPredicate(format: "SELF IN %@", argumentArray: array)
-                    if(predicate.evaluateWithObject(elementName)) {
-                    obj = {{ type.targetClassName }}(reader: reader)
+                    if(predicate.evaluate(with: elementName)) {
+                    obj = {{ type.targetClassName }}(reader: reader!)
                     break
                     }
                     }
@@ -670,7 +680,7 @@
                     */
                     class func {{ type.name }}FromFile(path:String) -> {{ type.targetClassName }}? {
                     let url = NSURL(fileURLWithPath:path)
-                    return self.{{ type.name }}FromURL(url)
+                    return self.{{ type.name }}FromURL(url: url)
                     }
                     
                     /**
@@ -681,14 +691,14 @@
                     *                  object generated from the XML.
                     */
                     class func {{ type.name }}FromData(data:NSData) -> {{ type.targetClassName }}? {
-                    let bytes = UnsafePointer<Int8>(data.bytes)
+                    let bytes = data.bytes.bindMemory(to: Int8.self, capacity: data.length);
                     let length = Int32(data.length)
                     let reader = xmlReaderForMemory(bytes, length, nil, nil, 0/*options*/)
                     
                     if(reader != nil) {
                     let ret = xmlTextReaderRead(reader)
                     if(ret > 0) {
-                    return {{ type.targetClassName }}(reader: reader)
+                    return {{ type.targetClassName }}(reader: reader!)
                     }
                     xmlFreeTextReader(reader)
                     }
@@ -722,14 +732,14 @@
                     return nil
                     }
                     xmlTextWriterSetIndent(writer, 1)
-                    xmlTextWriterSetIndentString(writer, UnsafePointer<xmlChar>(NSString(stringLiteral: "\t").UTF8String))
+                    xmlTextWriterSetIndentString(writer, "\t")
                     
                     // Serialize object
-                    let {{ type.name }}Name = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ type.name }}").UTF8String)
-                    let {{ type.name }}URLStr = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ type.schema.targetNamespace }}").UTF8String)
+                    let {{ type.name }}Name = "{{ type.name }}"
+                    let {{ type.name }}URLStr = "{{ type.schema.targetNamespace }}"
                     
                     xmlTextWriterStartElementNS(writer, nil, {{ type.name }}Name, {{ type.name }}URLStr)
-                    let resultStatusCode = {{ type.name }}Value.writeWithWriter(writer)
+                    let resultStatusCode = {{ type.name }}Value.writeWithWriter(writer: writer!)
                     
                     if resultStatusCode < 0 {
                     xmlBufferFree(buf)
@@ -744,7 +754,7 @@
                     return nil
                     }
                     
-                    let xmlData = NSData(bytes: buf.memory.content, length:Int(buf.memory.use))
+                    let xmlData = NSData(bytes: buf!.pointee.content, length: Int(buf!.pointee.use))
                     //print(UnsafePointer<String>(buf.memory.content))
                     
                     xmlBufferFree(buf)
@@ -762,19 +772,19 @@
             <prefix></prefix>
             <attribute>
                 <![CDATA[
-                    self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)))
+                    self.{{ attribute.variableName }} = {{ attribute.schemaType.enumerationName }}.fromString(enumString: String(cString: {{ attribute.name }}AttrValue!))
                 ]]>
             </attribute>
             <element>
                 <![CDATA[
-                    self.{{ element.variableName }} = {{ element.schemaType.enumerationName }}.fromString(String.fromCString(UnsafePointer<CChar>({{ element.name }}ElementValue)))
+                    self.{{ element.variableName }} = {{ element.schemaType.enumerationName }}.fromString(enumString: String(cString: UnsafePointer<CChar>({{ element.name }}ElementValue)))
                 ]]>
             </element>
             <value>
-                <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
+                <![CDATA[let value = String(cString: contentValue!)
                     if value != nil {
                     let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-                    self.value = {{ type.enumerationName }}.fromString(trimmed)
+                    self.value = {{ type.enumerationName }}.fromString(enumString: trimmed)
                     }]]>
             </value>
         </read>
@@ -783,14 +793,14 @@
             <attribute>
                 <![CDATA[var {{ attribute.variableName }}AttrValue: String?
                     if self.{{ attribute.variableName }} != .Unknown {
-                    {{ attribute.variableName }}AttrValue = {{ attribute.schemaType.enumerationName }}.toString(self.{{ attribute.variableName }}!)
+                    {{ attribute.variableName }}AttrValue = {{ attribute.schemaType.enumerationName }}.toString(enumType: self.{{ attribute.variableName }}!)
                     }]]>
             </attribute>
             <element>
-                <![CDATA[xmlTextWriterWriteElement(writer, "{{ element.name }}", {{ attribute.schemaType.enumerationName }}.toString(self.{{ element.variableName }}))]]>
+                <![CDATA[xmlTextWriterWriteElement(writer, "{{ element.name }}", {{ attribute.schemaType.enumerationName }}.toString(enumType: self.{{ element.variableName }}))]]>
             </element>
             <value>
-                <![CDATA[statusCode = Int(xmlTextWriterWriteString(writer, {{ type.baseClass.enumerationName }}.toString(self.value))
+                <![CDATA[statusCode = Int(xmlTextWriterWriteString(writer, {{ type.baseClass.enumerationName }}.toString(enumType: self.value))
                     if statusCode < 0 {
                     return statusCode
                     }]]>
@@ -801,29 +811,30 @@
             <class extension="swift">
                 <![CDATA[
                     import Foundation
-                    
+                    import libxml2
+
                     enum {{ type.enumerationName }} : {{ type.swiftIntEnum }} {
                     case Unknown = -1
-                    {% for enumValue in type.enumerationValues %}case {{ enumValue }}
+                    {% for enumValue in type.enumerationValues %}case {{ type.enumerationName }}_{{ enumValue }}
                     {% /for %}
                     
                     private static let namesArray = ["Unknown"{% for enumValue in type.enumerationValues %},"{{ enumValue }}"{% /for %}]
                     
-                    static func toString(enumType:{{ type.enumerationName }}) -> String {
+                    static func toString(enumType:{{ type.enumerationName }}) -> String! {
                     let i = enumType.rawValue + 1
                     return namesArray[i];
                     }
                     
-                    static func fromString(enumString:String?) -> {{ type.enumerationName }} {
+                    static func fromString(enumString: String?) -> {{ type.enumerationName }} {
                     if var enumString = enumString {
-                    let locale = NSLocale(localeIdentifier: "en_US_POSIX")
-                    let numFormatter = NSNumberFormatter()
-                    numFormatter.locale = locale
+                    let locale = Locale(identifier: "en_US_POSIX")
+                    let numFormatter = NumberFormatter()
+                    numFormatter.locale = (locale as Locale!)
                     
-                    if(numFormatter.numberFromString(enumString) != nil) {
+                    if(numFormatter.number(from: enumString) != nil) {
                     enumString = "Value\(enumString)"
                     }
-                    if let i = namesArray.indexOf(enumString) {
+                    if let i = namesArray.index(of: enumString) {
                     if let enumType = {{ type.enumerationName }}(rawValue:i-1) {
                     return enumType
                     }
